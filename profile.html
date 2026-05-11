@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garuda Profile</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <script>
+      window.location.replace('Profile.html');
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garuda Profile</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+
+        <div class="logo-box">
+            <div class="logo">
+                <i class="bi bi-send-fill"></i>
+            </div>
+
+            <div>
+                <h2>GARUDA</h2>
+                <p>WishWall</p>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search wishes, tags, people...">
+        </div>
+
+        <div class="profile-top">
+            <img src="https://i.pravatar.cc/100?img=12">
+
+            <div>
+                <h3>Aisha K.</h3>
+                <p>@aishak</p>
+            </div>
+        </div>
+
+    </nav>
+
+
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+
+            <button class="wish-btn">
+                + New Wish
+            </button>
+
+            <div class="menu">
+
+                <h4>MENU</h4>
+
+                <div class="menu-item active">
+                    <i class="bi bi-house"></i>
+                    Home
+                </div>
+
+                <div class="menu-item">
+                    <i class="bi bi-compass"></i>
+                    Explore
+                </div>
+
+                <div class="menu-item">
+                    <i class="bi bi-bookmark"></i>
+                    Bookmarks
+                </div>
+
+                <div class="menu-item">
+                    <i class="bi bi-bell"></i>
+                    Notifications
+                </div>
+
+                <div class="menu-item active-profile">
+                    <i class="bi bi-person"></i>
+                    Profile
+                </div>
+
+            </div>
+
+
+            <div class="trending">
+
+                <h4>TRENDING</h4>
+
+                <div class="trend-box">
+                    <h3>#nightwishes</h3>
+                    <p>1.2k wishes</p>
+                </div>
+
+                <div class="trend-box">
+                    <h3>#launch2026</h3>
+                    <p>874 wishes</p>
+                </div>
+
+                <div class="trend-box">
+                    <h3>#ideas</h3>
+                    <p>631 wishes</p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Center -->
+        <div class="main-content">
+
+            <!-- Cover -->
+            <div class="cover-photo"></div>
+
+
+            <!-- Profile Card -->
+            <div class="profile-card">
+
+                <div class="profile-header">
+
+                    <div class="profile-left">
+
+                        <img src="https://i.pravatar.cc/150?img=12"
+                        class="profile-image">
+
+                        <div>
+                            <h2>Aisha K.</h2>
+
+                            <p>@aishak</p>
+
+                            <p class="bio">
+                                Frontend Beginner Developer ✨
+                                Learning JavaScript and building projects.
+                            </p>
+
+                            <div class="tags">
+                                <span>#tech</span>
+                                <span>#frontend</span>
+                                <span>#learning</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <button class="edit-btn">
+                        Edit Profile
+                    </button>
+
+                </div>
+
+
+                <!-- Stats -->
+                <div class="stats">
+
+                    <div class="stat-box">
+                        <h2>11</h2>
+                        <p>Wishes</p>
+                    </div>
+
+                    <div class="stat-box">
+                        <h2>297</h2>
+                        <p>Followers</p>
+                    </div>
+
+                    <div class="stat-box">
+                        <h2>92</h2>
+                        <p>Following</p>
+                    </div>
+
+                    <div class="stat-box">
+                        <h2>1.4k</h2>
+                        <p>Likes</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Tabs -->
+            <div class="tabs">
+
+                <button class="tab active-tab">
+                    Wishes
+                </button>
+
+                <button class="tab">
+                    Saved
+                </button>
+
+                <button class="tab">
+                    Liked
+                </button>
+
+            </div>
+
+
+
+            <!-- Posts -->
+            <div id="postContainer"></div>
+
+        </div>
+
+
+
+
+        <!-- Right Side -->
+        <div class="right-panel">
+
+            <div class="card">
+
+                <h3>📌 Pinned Wish</h3>
+
+                <p>
+                    “May every person here find the courage
+                    to chase their one true wish this year.”
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>✨ Suggested Tags</h3>
+
+                <div class="tags">
+                    <span>#motivation</span>
+                    <span>#tech</span>
+                    <span>#travel</span>
+                    <span>#love</span>
+                    <span>#career</span>
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>🔔 Recent Activity</h3>
+
+                <div class="activity">
+                    Rahul liked your post
+                </div>
+
+                <div class="activity">
+                    Sara replied to your post
+                </div>
+
+                <div class="activity">
+                    Mike followed you
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
