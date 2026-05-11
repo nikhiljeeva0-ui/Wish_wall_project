@@ -1,0 +1,73 @@
+/* newwish.css */
+.full-composer {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fc-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fc-row label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.fc-row textarea {
+    resize: vertical;
+    width: 100%;
+}
+
+.upload-box {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-box:hover {
+    border-color: #f472b6;
+    background: #fdf2f8;
+    color: #db2777;
+}
+
+.upload-box i {
+    font-size: 32px;
+}
+
+.fc-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.btn-draft {
+    background: white;
+    border: 1px solid #cbd5e1;
+    padding: 8px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-draft:hover {
+    background: #f1f5f9;
+}

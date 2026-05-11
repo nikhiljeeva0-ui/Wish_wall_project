@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Garuda WishWall</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="edit-profile.css">
+</head>
+<body>
+    <div class="layout-container">
+        <!-- LEFT SIDEBAR -->
+        <nav class="sidebar">
+            <div class="logo-box"><i class="bi bi-balloon-heart-fill"></i></div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item" title="Home"><i class="bi bi-house-door"></i></a>
+                <a href="explore.html" class="nav-item" title="Explore"><i class="bi bi-compass"></i></a>
+                <a href="#" class="nav-item" title="Bookmarks"><i class="bi bi-bookmark"></i></a>
+                <a href="notifications.html" class="nav-item" title="Notifications"><i class="bi bi-bell"></i></a>
+                <a href="profile.html" class="nav-item active" title="Profile"><i class="bi bi-person"></i></a>
+                <a href="newwish.html" class="nav-item" title="New Wish"><i class="bi bi-pencil-square"></i></a>
+            </div>
+            <div class="profile-icon">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" alt="User">
+            </div>
+        </nav>
+
+        <!-- CENTER FEED -->
+        <main class="feed-container">
+            <div class="header-box">
+                <span class="widget-header" style="margin:0;">Edit Profile</span>
+            </div>
+
+            <div class="edit-box box">
+                <!-- AVATAR SELECTION -->
+                <div class="edit-section">
+                    <span class="section-title">Choose Your Avatar</span>
+                    <div class="avatar-grid" id="avatar-grid">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Blonde" class="avatar-option" alt="Blonde">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Glasses" class="avatar-option" alt="Glasses">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Curly" class="avatar-option" alt="Curly">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Beard" class="avatar-option" alt="Beard">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Pro" class="avatar-option" alt="Professional">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Student" class="avatar-option" alt="Student">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Dev" class="avatar-option" alt="Developer">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Artist" class="avatar-option" alt="Artist">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Anon" class="avatar-option" alt="Anonymous">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" class="avatar-option active" alt="Aisha">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Samir" class="avatar-option" alt="Samir">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" class="avatar-option" alt="Rahul">
+                    </div>
+                </div>
+
+                <!-- PROFILE EDIT CARD -->
+                <div class="edit-section">
+                    <span class="section-title">Profile Info</span>
+                    
+                    <div class="form-row">
+                        <label>Full Name</label>
+                        <input type="text" id="edit-name" class="input-light" value="Aisha Sharma">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Username</label>
+                        <input type="text" id="edit-username" class="input-light" value="@aisha_dreams">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Bio</label>
+                        <textarea id="edit-bio" class="input-light" rows="3">Chasing dreams, building startups, and loving life. Sharing my journey one wish at a time! ✨🚀</textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Location</label>
+                        <input type="text" id="edit-location" class="input-light" value="Bangalore, India">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Interests / Tags</label>
+                        <input type="text" id="edit-tags" class="input-light" value="Startups, Design, Travel">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="profile.html" class="btn-cancel">Cancel</a>
+                    <button class="btn-save" id="save-profile-btn">Save Changes</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR: LIVE PREVIEW -->
+        <aside class="right-sidebar">
+            <div class="widget box preview-box">
+                <span class="widget-header">Live Preview</span>
+                <div class="preview-card">
+                    <div class="preview-cover"></div>
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" id="preview-avatar" class="preview-avatar-img" alt="Preview">
+                    <div class="preview-details">
+                        <h3 id="preview-name">Aisha Sharma</h3>
+                        <span id="preview-username">@aisha_dreams</span>
+                        <p id="preview-bio">Chasing dreams, building startups, and loving life. Sharing my journey one wish at a time! ✨🚀</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="edit-profile.js"></script>
+</body>
+</html>

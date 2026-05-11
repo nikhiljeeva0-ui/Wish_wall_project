@@ -1,292 +1,176 @@
+// script.js
 document.addEventListener("DOMContentLoaded", function () {
     let textarea = document.getElementById("wish-textarea");
-    let charCount = document.querySelector(".char-count");
+    let countDisplay = document.querySelector(".count");
     let anonToggle = document.getElementById("anon-toggle");
-    let nameInput = document.querySelector(".anon-row .input");
-    let sendWishBtn = document.getElementById("send-wish-btn");
-    let mainContent = document.getElementById("main-content");
-    let feedEnd = document.querySelector(".feed-end");
-    let newWishBtn = document.getElementById("btn-new-wish");
+    let nameInput = document.getElementById("name-input");
+    let postBtn = document.getElementById("send-wish-btn");
+    let mainFeed = document.getElementById("main-content");
     let searchInput = document.getElementById("home-search");
-    let tabButtons = document.querySelectorAll(".tab");
+    
+    let moodButtons = document.querySelectorAll(".mood-tag");
+    let currentMood = "Dreaming";
+    let currentMoodColor = "purple";
 
-    var originalPosts = [];
-    var postCards = document.querySelectorAll(".post-card");
+    if (textarea) textarea.addEventListener("input", updateCount);
+    if (anonToggle) anonToggle.addEventListener("change", handleAnon);
+    if (postBtn) postBtn.addEventListener("click", submitWish);
+    if (searchInput) searchInput.addEventListener("input", searchFeed);
 
-    for (var i = 0; i < postCards.length; i++) {
-        originalPosts.push(postCards[i]);
+    let mobileBtn = document.getElementById("mobile-post-btn");
+    if (mobileBtn && textarea) {
+        mobileBtn.addEventListener("click", function() {
+            textarea.closest('.composer').style.display = 'flex'; 
+            textarea.focus();
+        });
     }
 
-    updateCharCount();
-    updateAnonymousState();
-    addReactionEvents();
-    addPostActionEvents();
-    addTabEvents();
+    moodButtons.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            moodButtons.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            currentMood = this.getAttribute("data-mood");
+            currentMoodColor = this.getAttribute("data-color");
+        });
+    });
 
-    textarea.addEventListener("input", updateCharCount);
-    anonToggle.addEventListener("change", updateAnonymousState);
-    sendWishBtn.addEventListener("click", createNewWish);
-    newWishBtn.addEventListener("click", focusOnTextarea);
-    searchInput.addEventListener("input", filterPosts);
-
-    function updateCharCount() {
-        let textLength = textarea.value.length;
-        charCount.textContent = textLength + " / 280";
+    function updateCount() {
+        countDisplay.textContent = textarea.value.length + "/280";
     }
 
-    function updateAnonymousState() {
+    function handleAnon() {
         if (anonToggle.checked) {
             nameInput.value = "";
             nameInput.disabled = true;
-            nameInput.placeholder = "Anonymous post selected";
-        }
-         else {
+            nameInput.placeholder = "Anon";
+            nameInput.style.opacity = "0.6";
+        } else {
             nameInput.disabled = false;
-            nameInput.placeholder = "Your name (or stay anon)";
+            nameInput.placeholder = "Name (optional)";
+            nameInput.style.opacity = "1";
         }
     }
 
+    function submitWish() {
+        let text = textarea.value.trim();
+        let name = nameInput.value.trim();
+        let displayName = "Anonymous";
+        let avatar = '<div class="avatar-sm anon-pic">?</div>';
 
-    function createNewWish() {
-        var wishText = textarea.value.trim();
-        var personName = nameInput.value.trim();
-        var displayName = "Anonymous";
-        var avatarText = "?";
-        var avatarClass = "";
-
-        if (wishText === "") {
-            alert("Please write your wish first.");
-            textarea.focus();
+        if (text === "") {
+            alert("Write a wish first.");
             return;
         }
 
-        if (!anonToggle.checked && personName !== "") {
-            displayName = personName;
-            avatarText = personName.charAt(0).toUpperCase();
-            avatarClass = " purple";
+        if (!anonToggle.checked && name !== "") {
+            displayName = name;
+            avatar = '<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(name) + '" class="avatar-sm" alt="User">';
         }
 
-        var newPost = document.createElement("article");
-        newPost.className = "post-card";
+        let newPost = document.createElement("div");
+        newPost.className = "post box";
+        if (anonToggle.checked) newPost.classList.add("anon-post");
 
-        if (anonToggle.checked) {
-            newPost.className = "post-card post-card-anon";
-        }
+        const emojis = {
+            "Dreaming": "✨", "Hustle": "🔥", "Love": "💖", 
+            "Travel": "🌍", "Startup": "🚀", "Goals": "🎯"
+        };
+        let emoji = emojis[currentMood] || "✨";
 
-        newPost.innerHTML =
-            '<div class="post-card-header">' +
-            '    <div class="avatar-circle md' + avatarClass + '">' + avatarText + '</div>' +
-            '    <div class="post-card-info">' +
-            '        <div class="post-card-top-row">' +
-            '            <span class="post-card-name">' + displayName + '</span>' +
-            '            <span class="tag tag-teal">#newwish</span>' +
-            '            <span class="post-card-time">Just now</span>' +
-            '        </div>' +
-            '    </div>' +
-            '</div>' +
-            '<p class="post-card-body"></p>' +
-            '<div class="reactions">' +
-            '    <button class="react-btn">👍 <span>0</span></button>' +
-            '    <button class="react-btn">❤️ <span>0</span></button>' +
-            '    <button class="react-btn">🔥 <span>0</span></button>' +
-            '    <button class="react-btn">⭐ <span>0</span></button>' +
-            '</div>' +
-            '<div class="post-divider"></div>' +
-            '<div class="post-actions">' +
-            '    <button class="post-action-btn reply">💬 Reply</button>' +
-            '    <button class="post-action-btn share">🔗 Share</button>' +
-            '    <button class="post-action-btn save">🔖 Save</button>' +
-            '</div>';
+        newPost.innerHTML = `
+            <div class="post-top">
+                ${avatar}
+                <div class="post-meta">
+                    <span class="author">${displayName}</span>
+                    <span class="time">Just now</span>
+                </div>
+                <span class="mood-badge badge-${currentMoodColor}">${emoji} ${currentMood}</span>
+            </div>
+            <div class="post-body">${text}</div>
+            <div class="post-bottom">
+                <div class="reactions">
+                    <button class="react-btn">👍 <span>0</span></button>
+                    <button class="react-btn">❤️ <span>0</span></button>
+                    <button class="react-btn">🔥 <span>0</span></button>
+                </div>
+                <div class="actions">
+                    <button class="action-btn"><i class="bi bi-chat"></i> Reply</button>
+                    <button class="action-btn"><i class="bi bi-share"></i> Share</button>
+                    <button class="action-btn"><i class="bi bi-bookmark"></i> Save</button>
+                </div>
+            </div>
+        `;
 
-        newPost.querySelector(".post-card-body").textContent = wishText;
-        mainContent.insertBefore(newPost, feedEnd);
-
-        originalPosts.unshift(newPost);
+        let composerBox = document.querySelector(".composer");
+        mainFeed.insertBefore(newPost, composerBox.nextSibling);
 
         textarea.value = "";
         nameInput.value = "";
         anonToggle.checked = false;
-
-        updateCharCount();
-        updateAnonymousState();
-        addReactionEvents();
-        addPostActionEvents();
-        filterPosts();
+        updateCount();
+        handleAnon();
+        moodButtons[0].click();
+        
+        setupReactions();
+        setupActions();
     }
 
-    function addReactionEvents() {
-        var reactionButtons = document.querySelectorAll(".react-btn");
-
-        for (var i = 0; i < reactionButtons.length; i++) {
-            if (!reactionButtons[i].hasAttribute("data-ready")) {
-                reactionButtons[i].setAttribute("data-ready", "true");
-                reactionButtons[i].addEventListener("click", function () {
-                    var post = this.closest(".post-card");
-                    var buttons = post.querySelectorAll(".react-btn");
-
-                    for (var j = 0; j < buttons.length; j++) {
-                        if (buttons[j] !== this && buttons[j].classList.contains("active")) {
-                            changeReactionCount(buttons[j], -1);
-                            buttons[j].classList.remove("active");
+    function setupReactions() {
+        document.querySelectorAll(".react-btn").forEach(function(btn) {
+            if (!btn.dataset.ready) {
+                btn.dataset.ready = "true";
+                btn.addEventListener("click", function() {
+                    let container = this.parentElement;
+                    container.querySelectorAll(".react-btn").forEach(b => {
+                        if (b !== btn && b.classList.contains("active")) {
+                            b.classList.remove("active");
+                            b.querySelector("span").textContent = parseInt(b.querySelector("span").textContent) - 1;
                         }
-                    }
+                    });
 
-                  if (this.classList.contains("active")) {
-                        changeReactionCount(this, -1);
-                        this.classList.remove("active");
-                    } else {
-                        changeReactionCount(this, 1);
-                        this.classList.add("active");
-                    }
-                });
-            }
-        }
-    }
-
-    function changeReactionCount(button, changeValue) {
-        var countSpan = button.querySelector("span");
-        var currentCount = parseInt(countSpan.textContent);
-        countSpan.textContent = currentCount + changeValue;
-    }
-
-    function addPostActionEvents() {
-        var replyButtons = document.querySelectorAll(".post-action-btn.reply");
-        var shareButtons = document.querySelectorAll(".post-action-btn.share");
-        var saveButtons = document.querySelectorAll(".post-action-btn.save");
-
-        for (var i = 0; i < replyButtons.length; i++) {
-            if (!replyButtons[i].hasAttribute("data-ready")) {
-                replyButtons[i].setAttribute("data-ready", "true");
-                replyButtons[i].addEventListener("click", function () {
-                    alert("Reply feature can be added next.");
-                });
-            }
-        }
-
-        for (var j = 0; j < shareButtons.length; j++) {
-            if (!shareButtons[j].hasAttribute("data-ready")) {
-                shareButtons[j].setAttribute("data-ready", "true");
-                shareButtons[j].addEventListener("click", function () {
-                    alert("Wish link shared successfully.");
-                });
-            }
-        }
-
-        for (var k = 0; k < saveButtons.length; k++) {
-            if (!saveButtons[k].hasAttribute("data-ready")) {
-                saveButtons[k].setAttribute("data-ready", "true");
-                saveButtons[k].addEventListener("click", function () {
+                    let span = this.querySelector("span");
+                    let val = parseInt(span.textContent);
                     if (this.classList.contains("active")) {
                         this.classList.remove("active");
-                        this.textContent = "🔖 Save";
+                        span.textContent = val - 1;
                     } else {
                         this.classList.add("active");
-                        this.textContent = "✅ Saved";
+                        span.textContent = val + 1;
                     }
                 });
             }
-        }
+        });
     }
 
-    function addTabEvents() {
-        for (var i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].addEventListener("click", function () {
-                for (var j = 0; j < tabButtons.length; j++) {
-                    tabButtons[j].classList.remove("active");
-                    tabButtons[j].setAttribute("aria-selected", "false");
-                }
-
-                this.classList.add("active");
-                this.setAttribute("aria-selected", "true");
-                sortPosts(this.textContent.trim());
-            });
-        }
-    }
-
-    function sortPosts(tabName) {
-        var posts = document.querySelectorAll(".post-card");
-        var postsArray = [];
-
-        for (var i = 0; i < posts.length; i++) {
-            postsArray.push(posts[i]);
-        }
-
-        if (tabName === "For You") {
-            postsArray = originalPosts.slice();
-        } else if (tabName === "Latest") {
-            postsArray.sort(function (a, b) {
-                return getTimeValue(a) - getTimeValue(b);
-            });
-        } else if (tabName === "Popular") {
-            postsArray.sort(function (a, b) {
-                return getTotalReactions(b) - getTotalReactions(a);
-            });
-        }
-
-        for (var j = 0; j < postsArray.length; j++) {
-            mainContent.insertBefore(postsArray[j], feedEnd);
-        }
-
-        filterPosts();
-    }
-
-    function getTimeValue(post) {
-        var timeText = post.querySelector(".post-card-time").textContent.toLowerCase();
-
-        if (timeText.indexOf("just now") !== -1) {
-            return 0;
-        }
-
-        if (timeText.indexOf("min") !== -1) {
-            return parseInt(timeText);
-        }
-
-        if (timeText.indexOf("hr") !== -1) {
-            return parseInt(timeText) * 60;
-        }
-
-        return 9999;
-    }
-
-    function getTotalReactions(post) {
-        var total = 0;
-        var spans = post.querySelectorAll(".react-btn span");
-
-        for (var i = 0; i < spans.length; i++) {
-            total = total + parseInt(spans[i].textContent);
-        }
-
-        return total;
-    }
-
-    function filterPosts() {
-        var searchText = searchInput.value.toLowerCase().trim();
-        var posts = document.querySelectorAll(".post-card");
-
-        for (var i = 0; i < posts.length; i++) {
-            var postText = posts[i].innerText.toLowerCase();
-
-            if (postText.indexOf(searchText) !== -1) {
-                posts[i].style.display = "block";
-            } else {
-                posts[i].style.display = "none";
+    function setupActions() {
+        document.querySelectorAll(".bi-bookmark").forEach(icon => {
+            let btn = icon.parentElement;
+            if (!btn.dataset.ready) {
+                btn.dataset.ready = "true";
+                btn.addEventListener("click", function() {
+                    if (icon.classList.contains("bi-bookmark")) {
+                        icon.className = "bi bi-bookmark-fill text-pink";
+                        icon.style.color = "#ec4899";
+                    } else {
+                        icon.className = "bi bi-bookmark";
+                        icon.style.color = "";
+                    }
+                });
             }
-        }
+        });
     }
-    function filterPosts(){
-        let searchText = searchInput.value.toLowerCase().trim();
-        let post = document.querySelectorAll("#post-card");
 
-        for(var i = 0 ;  i < posts.lenght ; i++  ){
-            let postText = posts[i].innerText.toLoweCase();
-            if (postText.indexOf(searchText) !== -1) {
-                posts[i].style.display = "run";
-            }
-            else {
-                posts[i].style.display = "none";
-            }
-          
-        }
-         
+    function searchFeed() {
+        let term = searchInput.value.toLowerCase().trim();
+        document.querySelectorAll(".post").forEach(post => {
+            let txt = post.innerText.toLowerCase();
+            post.style.display = txt.includes(term) ? "flex" : "none";
+        });
     }
+
+    // Init
+    if (textarea) updateCount();
+    if (anonToggle) handleAnon();
+    setupReactions();
+    setupActions();
 });

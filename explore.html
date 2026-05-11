@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore - Garuda WishWall</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="explore.css">
+</head>
+<body>
+    <div class="layout-container">
+        <!-- LEFT SIDEBAR -->
+        <nav class="sidebar">
+            <div class="logo-box"><i class="bi bi-balloon-heart-fill"></i></div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item" title="Home"><i class="bi bi-house-door"></i></a>
+                <a href="explore.html" class="nav-item active" title="Explore"><i class="bi bi-compass"></i></a>
+                <a href="#" class="nav-item" title="Bookmarks"><i class="bi bi-bookmark"></i></a>
+                <a href="notifications.html" class="nav-item" title="Notifications"><i class="bi bi-bell"></i></a>
+                <a href="profile.html" class="nav-item" title="Profile"><i class="bi bi-person"></i></a>
+                <a href="newwish.html" class="nav-item" title="New Wish"><i class="bi bi-pencil-square"></i></a>
+            </div>
+            <div class="profile-icon">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" alt="User">
+            </div>
+        </nav>
+
+        <!-- CENTER FEED -->
+        <main class="feed-container">
+            <div class="header-box">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input id="explore-search" type="search" placeholder="Search trending wishes...">
+                </div>
+            </div>
+
+            <div class="explore-moods box">
+                <span class="widget-header">Filter by Mood</span>
+                <div class="mood-options">
+                    <button class="mood-tag active" data-filter="All">All</button>
+                    <button class="mood-tag" data-filter="Dreaming">✨ Dreaming</button>
+                    <button class="mood-tag" data-filter="Hustle">🔥 Hustle</button>
+                    <button class="mood-tag" data-filter="Love">💖 Love</button>
+                    <button class="mood-tag" data-filter="Travel">🌍 Travel</button>
+                    <button class="mood-tag" data-filter="Startup">🚀 Startup</button>
+                </div>
+            </div>
+
+            <div id="explore-feed">
+                <!-- Posts -->
+                <div class="post box" data-mood="Dreaming">
+                    <div class="post-top">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sam" class="avatar-sm" alt="Sam">
+                        <div class="post-meta">
+                            <span class="author">Samir</span>
+                            <span class="time">5h ago</span>
+                        </div>
+                        <span class="mood-badge badge-purple">✨ Dreaming</span>
+                    </div>
+                    <div class="post-body">I wish I could live by the mountains and code in peace.</div>
+                </div>
+
+                <div class="post box" data-mood="Startup">
+                    <div class="post-top">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Anita" class="avatar-sm" alt="Anita">
+                        <div class="post-meta">
+                            <span class="author">Anita</span>
+                            <span class="time">8h ago</span>
+                        </div>
+                        <span class="mood-badge badge-orange">🚀 Startup</span>
+                    </div>
+                    <div class="post-body">Building a product that helps people track their habits easily!</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+            <div class="widget box">
+                <span class="widget-header">Who to Follow</span>
+                <div class="user-list">
+                    <div class="user-row">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tanya" class="avatar-sm" alt="Tanya">
+                        <div class="user-info">
+                            <span class="u-name">Tanya</span>
+                            <span class="u-handle">@tanya_t</span>
+                        </div>
+                        <button class="btn-follow">Follow</button>
+                    </div>
+                    <div class="user-row">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karan" class="avatar-sm" alt="Karan">
+                        <div class="user-info">
+                            <span class="u-name">Karan</span>
+                            <span class="u-handle">@karan_dev</span>
+                        </div>
+                        <button class="btn-follow">Follow</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="explore.js"></script>
+</body>
+</html>

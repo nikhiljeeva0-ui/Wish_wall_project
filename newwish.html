@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Wish - Garuda WishWall</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="newwish.css">
+</head>
+<body>
+    <div class="layout-container">
+        <!-- LEFT SIDEBAR -->
+        <nav class="sidebar">
+            <div class="logo-box"><i class="bi bi-balloon-heart-fill"></i></div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item" title="Home"><i class="bi bi-house-door"></i></a>
+                <a href="explore.html" class="nav-item" title="Explore"><i class="bi bi-compass"></i></a>
+                <a href="#" class="nav-item" title="Bookmarks"><i class="bi bi-bookmark"></i></a>
+                <a href="notifications.html" class="nav-item" title="Notifications"><i class="bi bi-bell"></i></a>
+                <a href="profile.html" class="nav-item" title="Profile"><i class="bi bi-person"></i></a>
+                <a href="newwish.html" class="nav-item active" title="New Wish"><i class="bi bi-pencil-square"></i></a>
+            </div>
+            <div class="profile-icon">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" alt="User">
+            </div>
+        </nav>
+
+        <!-- CENTER FEED -->
+        <main class="feed-container">
+            <div class="header-box">
+                <span class="widget-header" style="margin:0;">Create a New Wish</span>
+            </div>
+
+            <div class="full-composer box">
+                <div class="fc-row">
+                    <label>Display Name</label>
+                    <div class="anon-tools" style="justify-content: flex-start;">
+                        <input type="text" id="nw-name" class="input-light" placeholder="Name (optional)" style="width:200px;">
+                        <label class="anon-label">
+                            <input type="checkbox" id="nw-anon">
+                            <span>Post Anonymously</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="fc-row">
+                    <label>Your Wish</label>
+                    <textarea id="nw-text" class="input-light" rows="5" placeholder="Describe your wish in detail..."></textarea>
+                    <span class="count" id="nw-count">0/500</span>
+                </div>
+
+                <div class="fc-row">
+                    <label>Select Mood</label>
+                    <div class="mood-options">
+                        <button class="mood-tag active" data-mood="Dreaming" data-color="purple">✨ Dreaming</button>
+                        <button class="mood-tag" data-mood="Hustle" data-color="pink">🔥 Hustle</button>
+                        <button class="mood-tag" data-mood="Love" data-color="red">💖 Love</button>
+                        <button class="mood-tag" data-mood="Travel" data-color="blue">🌍 Travel</button>
+                        <button class="mood-tag" data-mood="Startup" data-color="orange">🚀 Startup</button>
+                        <button class="mood-tag" data-mood="Goals" data-color="green">🎯 Goals</button>
+                    </div>
+                </div>
+
+                <div class="fc-row">
+                    <label>Add Tags</label>
+                    <input type="text" class="input-light" placeholder="e.g. #startup #dreams (comma separated)" style="width:100%;">
+                </div>
+
+                <div class="fc-row">
+                    <label>Attach Image</label>
+                    <div class="upload-box">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <span>Click to upload image</span>
+                    </div>
+                </div>
+
+                <div class="fc-actions">
+                    <button class="btn-draft" id="nw-draft">Save Draft</button>
+                    <button class="btn-post" id="nw-post">Publish Wish</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+            <div class="widget box feat-widget">
+                <div class="feat-header">
+                    <i class="bi bi-stars star-icon"></i>
+                    <span class="feat-title">Wish Tips</span>
+                </div>
+                <p class="feat-desc">Be authentic. The community loves detailed wishes. Don't be afraid to dream big!</p>
+            </div>
+        </aside>
+    </div>
+    <script src="newwish.js"></script>
+</body>
+</html>

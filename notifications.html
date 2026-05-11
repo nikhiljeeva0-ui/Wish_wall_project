@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Garuda WishWall</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notifications.css">
+</head>
+<body>
+    <div class="layout-container">
+        <!-- LEFT SIDEBAR -->
+        <nav class="sidebar">
+            <div class="logo-box"><i class="bi bi-balloon-heart-fill"></i></div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item" title="Home"><i class="bi bi-house-door"></i></a>
+                <a href="explore.html" class="nav-item" title="Explore"><i class="bi bi-compass"></i></a>
+                <a href="#" class="nav-item" title="Bookmarks"><i class="bi bi-bookmark"></i></a>
+                <a href="notifications.html" class="nav-item active" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge alert">1</span>
+                </a>
+                <a href="profile.html" class="nav-item" title="Profile"><i class="bi bi-person"></i></a>
+                <a href="newwish.html" class="nav-item" title="New Wish"><i class="bi bi-pencil-square"></i></a>
+            </div>
+            <div class="profile-icon">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" alt="User">
+            </div>
+        </nav>
+
+        <!-- CENTER FEED -->
+        <main class="feed-container">
+            <div class="header-box">
+                <span class="widget-header" style="margin:0;">Notifications</span>
+                <button class="btn-text" id="mark-read-btn">Mark all as read</button>
+            </div>
+
+            <div class="notifications-list box">
+                <div class="notif-item unread">
+                    <div class="notif-icon bg-pink"><i class="bi bi-heart-fill"></i></div>
+                    <div class="notif-content">
+                        <p><strong>Rahul J.</strong> liked your wish: "I wish I could travel..."</p>
+                        <span class="time">10m ago</span>
+                    </div>
+                    <div class="unread-dot"></div>
+                </div>
+
+                <div class="notif-item">
+                    <div class="notif-icon bg-blue"><i class="bi bi-person-plus-fill"></i></div>
+                    <div class="notif-content">
+                        <p><strong>Anita</strong> started following you.</p>
+                        <span class="time">2h ago</span>
+                    </div>
+                </div>
+
+                <div class="notif-item">
+                    <div class="notif-icon bg-purple"><i class="bi bi-chat-fill"></i></div>
+                    <div class="notif-content">
+                        <p><strong>Samir</strong> replied: "That sounds amazing!"</p>
+                        <span class="time">1d ago</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+            <div class="widget box">
+                <span class="widget-header">Settings Shortcut</span>
+                <div class="site-links" style="text-align: left; display:flex; flex-direction:column; gap:10px;">
+                    <a href="#">Push Notifications</a>
+                    <a href="#">Email Alerts</a>
+                    <a href="#">Privacy Options</a>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="notifications.js"></script>
+</body>
+</html>

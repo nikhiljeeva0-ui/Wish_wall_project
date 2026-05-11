@@ -1,359 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garuda WishWall</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <header class="navbar" role="banner">
-        <div class="navbar__logo">
-            <div class="navbar__logo-icon" aria-hidden="true">
-                <i class="bi bi-arrow-through-heart-fill"></i>
+    <div class="layout-container">
+        
+        <!-- LEFT SIDEBAR (12% width) -->
+        <nav class="sidebar">
+            <div class="logo-box">
+                <i class="bi bi-balloon-heart-fill"></i>
             </div>
-            <div>
-                <div class="navbar__logo-name">Garuda</div>
-                <div class="navbar__logo-sub">WishWall</div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item active" title="Home">
+                    <i class="bi bi-house-door"></i>
+                </a>
+                <a href="explore.html" class="nav-item" title="Explore">
+                    <i class="bi bi-compass"></i>
+                </a>
+                <a href="#" class="nav-item" title="Bookmarks">
+                    <i class="bi bi-bookmark"></i>
+                    <span class="badge">4</span>
+                </a>
+                <a href="notifications.html" class="nav-item" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge alert">1</span>
+                </a>
+                <a href="profile.html" class="nav-item" title="Profile">
+                    <i class="bi bi-person"></i>
+                </a>
+                <a href="newwish.html" class="nav-item" title="New Wish">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
             </div>
-        </div>
-
-        <div class="navbar__search" role="search">
-            <i class="bi bi-search navbar__search-icon" aria-hidden="true"></i>
-            <input id="home-search" type="search" placeholder="Search wishes, tags, people…" aria-label="Search" />
-        </div>
-
-        <nav class="navbar__right" aria-label="Header actions">
-            <button class="navbar__icon-btn" title="Notifications" aria-label="Notifications">
-                <i class="bi bi-bell"></i>
-                <span class="notif-dot"></span>
-            </button>
-            <a href="login.html" class="navbar__profile-btn" aria-label="Profile">
-                <div class="avatar-circle sm purple" style="position:relative;">
-                    AK
-                    <span class="status-dot"></span>
-                </div>
-                <div>
-                    <div class="navbar__profile-name">Aisha K.</div>
-                    <div class="navbar__profile-role">@aishak</div>
-                </div>
-            </a>
+            <div class="profile-icon">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" alt="User">
+            </div>
         </nav>
-    </header>
-    <div class="layout">
 
-        <!-- ===== SIDEBAR ===== -->
-        <aside class="sidebar" aria-label="Navigation">
-            <button class="btn-new-wish" id="btn-new-wish">
-                <i class="bi bi-plus-lg"></i>
-                <span>New Wish</span>
-            </button>
-
-            <div>
-                <div class="sidebar-section-label">Menu</div>
-                <nav class="nav-list" aria-label="Sidebar navigation">
-                    <a href="index.html" class="nav-item active" aria-current="page">
-                        <i class="bi bi-house-door"></i>
-                        <span>Home</span>
-                    </a>
-                    <a href="explore.html" class="nav-item">
-                        <i class="bi bi-compass"></i>
-                        <span>Explore</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="bi bi-bookmark"></i>
-                        <span>Bookmarks</span>
-                        <span class="nav-count">4</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="bi bi-bell"></i>
-                        <span>Notifications</span>
-                        <span class="nav-count">12</span>
-                    </a>
-                    <a href="profile.html" class="nav-item">
-                        <i class="bi bi-person"></i>
-                        <span>Profile</span>
-                    </a>
-                    <a href="admin.html" class="nav-item">
-                        <i class="bi bi-grid"></i>
-                        <span>Admin</span>
-                    </a>
-                </nav>
+        <!-- CENTER FEED (58% width) -->
+        <main class="feed-container" id="main-content">
+            <!-- Top Search Bar -->
+            <div class="header-box">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input id="home-search" type="search" placeholder="Search wishes, tags, people...">
+                </div>
+                <div class="tab-wrap">
+                    <button class="top-tab active">For You</button>
+                    <button class="top-tab">Latest</button>
+                    <button class="top-tab">Popular</button>
+                </div>
             </div>
 
-            <div class="divider"></div>
+            <!-- Composer Box -->
+            <div class="composer box">
+                <div class="composer-top">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" class="avatar-sm" alt="User">
+                    <textarea id="wish-textarea" placeholder="What's your wish today?" rows="1"></textarea>
+                </div>
 
-            <div>
-                <div class="sidebar-section-label">Trending</div>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                    <div class="trend-card">
-                        <div class="trend-card__thumb" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">🌙
-                        </div>
-                        <div>
-                            <div class="trend-card__title">#nightwishes</div>
-                            <div class="trend-card__meta">1.2k wishes</div>
-                        </div>
+                <div class="mood-bar">
+                    <span class="mood-title">Mood:</span>
+                    <div class="mood-options">
+                        <!-- JS classes preserved exactly: mood-tag, data-mood, data-color -->
+                        <button class="mood-tag active" data-mood="Dreaming" data-color="purple">✨ Dreaming</button>
+                        <button class="mood-tag" data-mood="Hustle" data-color="pink">🔥 Hustle</button>
+                        <button class="mood-tag" data-mood="Love" data-color="red">💖 Love</button>
+                        <button class="mood-tag" data-mood="Travel" data-color="blue">🌍 Travel</button>
+                        <button class="mood-tag" data-mood="Startup" data-color="orange">🚀 Startup</button>
+                        <button class="mood-tag" data-mood="Goals" data-color="green">🎯 Goals</button>
                     </div>
-                    <div class="trend-card">
-                        <div class="trend-card__thumb" style="background:linear-gradient(135deg,#0d9488,#0284c7);">🚀
-                        </div>
-                        <div>
-                            <div class="trend-card__title">#launch2026</div>
-                            <div class="trend-card__meta">874 wishes</div>
-                        </div>
+                </div>
+
+                <div class="composer-bottom">
+                    <div class="anon-tools">
+                        <input type="text" id="name-input" class="input-light" placeholder="Name (optional)" />
+                        <label class="anon-label">
+                            <input type="checkbox" id="anon-toggle">
+                            <span>Anonymous</span>
+                        </label>
+                        <span class="count">0/280</span>
                     </div>
-                    <div class="trend-card">
-                        <div class="trend-card__thumb" style="background:linear-gradient(135deg,#db2777,#7c3aed);">💡
-                        </div>
-                        <div>
-                            <div class="trend-card__title">#ideas</div>
-                            <div class="trend-card__meta">631 wishes</div>
-                        </div>
+                    <div class="action-tools">
+                        <button class="icon-action"><i class="bi bi-image"></i></button>
+                        <button class="btn-post" id="send-wish-btn">Post Wish</button>
                     </div>
                 </div>
             </div>
 
-            <div class="online-bar">
-                <div class="online-dot"></div>
-                <span class="online-text">347 online now</span>
-            </div>
-
-            <div class="sidebar-footer">
-                <div class="sidebar-footer-row">
-                    <div class="avatar-circle sm purple" style="position:relative;">
-                        AK
-                        <span class="status-dot"></span>
+            <!-- Feed Posts -->
+            <div class="post box">
+                <div class="post-top">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" class="avatar-sm" alt="Rahul">
+                    <div class="post-meta">
+                        <span class="author">Rahul J.</span>
+                        <span class="time">2m ago</span>
                     </div>
-                    <div style="flex:1;min-width:0;">
-                        <div class="sidebar-footer-name">Aisha K.</div>
-                        <div class="sidebar-footer-handle">@aishak</div>
-                    </div>
-                    <button class="navbar__icon-btn" title="Settings" aria-label="Settings"
-                        style="width:28px;height:28px;border-radius:8px;">
-                        <i class="bi bi-gear"></i>
-                    </button>
+                    <span class="mood-badge badge-blue">🌍 Travel</span>
                 </div>
-            </div>
-        </aside>
-
-
-        <main class="main" id="main-content">
-
-            <div class="feed-header">
-                <h2>WishWall Feed</h2>
-                <div class="feed-tabs" role="tablist">
-                    <button class="tab active" role="tab" aria-selected="true">For You</button>
-                    <button class="tab" role="tab" aria-selected="false">Latest</button>
-                    <button class="tab" role="tab" aria-selected="false">Popular</button>
+                <div class="post-body">
+                    I wish I could travel to every country before I turn 30. Life is too short to stay in one place! 🌍✨
+                </div>
+                <div class="post-bottom">
+                    <div class="reactions">
+                        <button class="react-btn active">👍 <span>42</span></button>
+                        <button class="react-btn">❤️ <span>18</span></button>
+                        <button class="react-btn">🔥 <span>9</span></button>
+                    </div>
+                    <div class="actions">
+                        <button class="action-btn"><i class="bi bi-chat"></i> Reply</button>
+                        <button class="action-btn"><i class="bi bi-share"></i> Share</button>
+                        <button class="action-btn"><i class="bi bi-bookmark"></i> Save</button>
+                    </div>
                 </div>
             </div>
 
-
-            <article class="create-card" aria-label="Create a wish">
-                <div class="create-card-top">
-                    <div class="avatar-circle md purple" style="position:relative;">
-                        AK
-                        <span class="status-dot"></span>
+            <div class="post box anon-post">
+                <div class="post-top">
+                    <div class="avatar-sm anon-pic">?</div>
+                    <div class="post-meta">
+                        <span class="author">Anonymous</span>
+                        <span class="time">15m ago</span>
                     </div>
-                    <div class="create-card-body">
-                        <textarea class="textarea" id="wish-textarea" placeholder="Write your wish... ✨" rows="3"
-                            maxlength="280" aria-label="Write your wish"></textarea>
-                        <div class="anon-row">
-                            <input type="text" class="input" style="flex:1;height:36px;"
-                                placeholder="Your name (or stay anon)" aria-label="Name" />
-                            <label class="anon-row" style="cursor:pointer;white-space:nowrap;gap:6px;">
-                                <input type="checkbox" class="anon-check" id="anon-toggle"
-                                    aria-label="Post anonymously" />
-                                <span class="anon-label">Anonymous</span>
-                            </label>
-                            <span class="char-count" aria-live="polite">0 / 280</span>
-                        </div>
+                    <span class="mood-badge badge-purple">✨ Dreaming</span>
+                </div>
+                <div class="post-body">
+                    My biggest wish is to finally be proud of myself. Not for anyone else — just for me. Working on it every single day. 💪
+                </div>
+                <div class="post-bottom">
+                    <div class="reactions">
+                        <button class="react-btn">👍 <span>87</span></button>
+                        <button class="react-btn active">❤️ <span>54</span></button>
+                        <button class="react-btn">🔥 <span>31</span></button>
                     </div>
-                </div>
-                <div class="create-card-actions">
-                    <button class="btn btn-primary" id="send-wish-btn">
-                        <i class="bi bi-send-fill"></i>
-                        Send Wish
-                    </button>
-                    <button class="btn btn-ghost">
-                        <i class="bi bi-image"></i>
-                        Add Image
-                    </button>
-                    <button class="btn btn-ghost">
-                        <i class="bi bi-tag"></i>
-                        Add Tag
-                    </button>
-                </div>
-            </article>
-
-            <!-- Post 1 -->
-            <article class="post-card">
-                <div class="post-card-header">
-                    <div class="avatar-circle md blue">RJ</div>
-                    <div class="post-card-info">
-                        <div class="post-card-top-row">
-                            <span class="post-card-name">Rahul J.</span>
-                            <span class="tag tag-purple">#adventure</span>
-                            <span class="post-card-time">2 min ago</span>
-                        </div>
+                    <div class="actions">
+                        <button class="action-btn"><i class="bi bi-chat"></i> Reply</button>
+                        <button class="action-btn"><i class="bi bi-share"></i> Share</button>
+                        <button class="action-btn"><i class="bi bi-bookmark"></i> Save</button>
                     </div>
                 </div>
-                <p class="post-card-body">I wish I could travel to every country before I turn 30. Life is too short to
-                    stay in one place! 🌍✨</p>
-                <div class="reactions">
-                    <button class="react-btn active">👍 <span>42</span></button>
-                    <button class="react-btn">❤️ <span>18</span></button>
-                    <button class="react-btn">🔥 <span>9</span></button>
-                    <button class="react-btn">⭐ <span>5</span></button>
-                </div>
-                <div class="post-divider"></div>
-                <div class="post-actions">
-                    <button class="post-action-btn reply">💬 Reply</button>
-                    <button class="post-action-btn share">🔗 Share</button>
-                    <button class="post-action-btn save">🔖 Save</button>
-                </div>
-            </article>
-
-            <!-- Post 2 (Anonymous) -->
-            <article class="post-card post-card-anon">
-                <div class="post-card-header">
-                    <div class="avatar-circle md"
-                        style="background:linear-gradient(135deg,#374151,#1f2937);color:#9ca3af;">?</div>
-                    <div class="post-card-info">
-                        <div class="post-card-top-row">
-                            <span class="post-card-name">Anonymous</span>
-                            <span class="tag tag-teal">#motivation</span>
-                            <span class="post-card-time">15 min ago</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="post-card-body">My biggest wish is to finally be proud of myself. Not for anyone else — just
-                    for me. Working on it every single day. 💪</p>
-                <div class="reactions">
-                    <button class="react-btn">👍 <span>87</span></button>
-                    <button class="react-btn active">❤️ <span>54</span></button>
-                    <button class="react-btn">🔥 <span>31</span></button>
-                    <button class="react-btn">⭐ <span>22</span></button>
-                </div>
-                <div class="post-divider"></div>
-                <div class="post-actions">
-                    <button class="post-action-btn reply">💬 Reply</button>
-                    <button class="post-action-btn share">🔗 Share</button>
-                    <button class="post-action-btn save">🔖 Save</button>
-                </div>
-            </article>
-
-            <!-- Post 3 -->
-
-
-            <!-- Post 4 -->
-            <article class="post-card">
-                <div class="post-card-header">
-                    <div class="avatar-circle md teal">NK</div>
-                    <div class="post-card-info">
-                        <div class="post-card-top-row">
-                            <span class="post-card-name">Nikhil K.</span>
-                            <span class="tag tag-blue">#tech</span>
-                            <span class="post-card-time">3 hr ago</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="post-card-body">I wish we lived in a world where everyone could access high-speed internet for
-                    free. Education shouldn't depend on location. 🌐</p>
-                <div class="reactions">
-                    <button class="react-btn">👍 <span>114</span></button>
-                    <button class="react-btn">❤️ <span>76</span></button>
-                    <button class="react-btn">🔥 <span>33</span></button>
-                    <button class="react-btn active">⭐ <span>41</span></button>
-                </div>
-                <div class="post-divider"></div>
-                <div class="post-actions">
-                    <button class="post-action-btn reply">💬 Reply</button>
-                    <button class="post-action-btn share">🔗 Share</button>
-                    <button class="post-action-btn save">🔖 Save</button>
-                </div>
-            </article>
-
-            <div class="feed-end">You're all caught up ✨</div>
+            </div>
+            
+            <div class="feed-footer">You're all caught up!</div>
         </main>
 
-        <!-- ===== RIGHT PANEL ===== -->
-        <aside class="right-panel" aria-label="Widgets">
-
-            <!-- Pinned -->
-            <div class="widget pinned-widget">
-                <div class="widget-title">📌 Pinned Wish</div>
-                <div class="pinned-inner">
-                    <div class="pinned-thumb">🌟</div>
-                    <div>
-                        <div class="pinned-title">Community Starwish 2026</div>
-                        <span class="tag tag-amber" style="margin-top:6px;display:inline-flex;">Featured</span>
-                    </div>
+        <!-- RIGHT SIDEBAR (30% width) -->
+        <aside class="right-sidebar">
+            <div class="widget feat-widget box">
+                <div class="feat-header">
+                    <i class="bi bi-star-fill star-icon"></i>
+                    <span class="feat-title">Featured Wish</span>
                 </div>
-                <p class="pinned-quote">"May every person here find the courage to chase their one true wish this year."
-                </p>
+                <p class="feat-desc">"May every person here find the courage to chase their one true wish this year."</p>
+                <button class="btn-link">Join Thread</button>
             </div>
 
-            <!-- Suggested Tags -->
-            <div class="widget">
-                <div class="widget-title">✨ Suggested Tags</div>
-                <div class="tags-wrap">
-                    <span class="tag tag-purple">#motivation</span>
-                    <span class="tag tag-blue">#tech</span>
-                    <span class="tag tag-teal">#travel</span>
-                    <span class="tag tag-pink">#love</span>
-                    <span class="tag tag-amber">#career</span>
-                    <span class="tag tag-purple">#health</span>
-                    <span class="tag tag-blue">#learning</span>
-                    <span class="tag tag-teal">#adventure</span>
+            <div class="widget box">
+                <span class="widget-header">Trending Tags</span>
+                <div class="tag-cloud">
+                    <span class="trend-tag">#startup2026</span>
+                    <span class="trend-tag">#motivation</span>
+                    <span class="trend-tag">#tech</span>
+                    <span class="trend-tag">#love</span>
+                    <span class="trend-tag">#career</span>
                 </div>
             </div>
 
-
-            <div class="widget">
-                <div class="widget-title">🔔 Recent Activity</div>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                    <div class="activity-item">
-                        <span class="activity-emoji">❤️</span>
-                        <span class="activity-text"><strong>Rahul J.</strong> liked your wish</span>
-                        <span class="activity-time">2m</span>
-                    </div>
-                    <div class="activity-item">
-                        <span class="activity-emoji">💬</span>
-                        <span class="activity-text"><strong>Sara A.</strong> replied to you</span>
-                        <span class="activity-time">15m</span>
-                    </div>
-                    <div class="activity-item">
-                        <span class="activity-emoji">⭐</span>
-                        <span class="activity-text"><strong>Anonymous</strong> starred your post</span>
-                        <span class="activity-time">1h</span>
-                    </div>
-                    <div class="activity-item">
-                        <span class="activity-emoji">🔖</span>
-                        <span class="activity-text"><strong>Nikhil K.</strong> saved your wish</span>
-                        <span class="activity-time">3h</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer links -->
-            <div style="padding:4px 4px 0;">
-                <div style="display:flex;flex-wrap:wrap;gap:8px 12px;">
-                    <a href="#" style="font-size:11px;color:#64748b;">Privacy</a>
-                    <a href="#" style="font-size:11px;color:#64748b;">Terms</a>
-                    <a href="#" style="font-size:11px;color:#64748b;">Support</a>
-                    <a href="#" style="font-size:11px;color:#64748b;">Blog</a>
-                </div>
-                <p style="font-size:10.5px;color:#64748b;margin-top:8px;">© 2026 Garuda WishWall</p>
+            <div class="site-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Support</a>
+                <p>© 2026 Garuda WishWall</p>
             </div>
         </aside>
 
+        <!-- Mobile Post FAB -->
+        <button class="mobile-fab" id="mobile-post-btn">
+            <i class="bi bi-plus-lg"></i>
+        </button>
     </div>
+
     <script src="script.js"></script>
 </body>
-
 </html>
