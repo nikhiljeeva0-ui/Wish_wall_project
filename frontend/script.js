@@ -1,4 +1,6 @@
 // script.js
+const API_URL = "http://localhost:3000/posts";
+
 document.addEventListener("DOMContentLoaded", function () {
     let textarea = document.getElementById("wish-textarea");
     let countDisplay = document.querySelector(".count");
@@ -51,99 +53,204 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function submitWish() {
-        let text = textarea.value.trim();
-        let name = nameInput.value.trim();
-        let displayName = "Anonymous";
-        let avatar = '<div class="avatar-sm anon-pic">?</div>';
+    // 1. GET ALL WISHES FROM BACKEND
+    async function loadWishes() {
+        try {
+            let response = await fetch(API_URL);
+            let wishes = await response.json();
+            
+            // Clear existing posts except composer
+            let posts = mainFeed.querySelectorAll('.post');
+            posts.forEach(post => post.remove());
+            
+            // Display all wishes from database
+            wishes.forEach(wish => {
+                displayWish(wish);
+            });
+        } catch (error) {
+            console.error("Error loading wishes:", error);
+        }
+    }
 
+    // 2. CREATE A WISH VIA BACKEND
+    async function submitWish() {
+        let text = textarea.value.trim();
+        
         if (text === "") {
             alert("Write a wish first.");
             return;
         }
 
-        if (!anonToggle.checked && name !== "") {
-            displayName = name;
-            avatar = '<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(name) + '" class="avatar-sm" alt="User">';
+        let token = localStorage.getItem("token");
+        if (!token) {
+            alert("Please login first to post a wish.");
+            window.location.href = "loginpage.html";
+            return;
+        }
+
+        // Prepare data for backend (GitHub backend uses 'content')
+        let newWishData = {
+            content: text
+        };
+
+        try {
+            let response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(newWishData)
+            });
+
+            if (response.ok) {
+                let data = await response.json();
+                
+                // Add to UI
+                displayWish(data.post, true);
+
+                // Reset form
+                textarea.value = "";
+                if (!anonToggle.checked) nameInput.value = "";
+                updateCount();
+                moodButtons[0].click();
+            } else {
+                let errData = await response.json();
+                alert(errData.error || "Failed to create wish.");
+            }
+        } catch (error) {
+            console.error("Error creating wish:", error);
+            alert("Error connecting to server.");
+        }
+    }
+
+    // HELPER FUNCTION TO DISPLAY A WISH IN THE UI
+    function displayWish(wish, prepend = false) {
+        // GitHub backend uses author object for name
+        let displayName = "Anonymous";
+        if (wish.author && wish.author.name) {
+            displayName = wish.author.name;
+        } else if (wish.authorId) {
+            displayName = wish.authorId; // Fallback for localStore
+        }
+        
+        let text = wish.content || "";
+        let likesCount = wish.likes ? wish.likes.length : 0;
+        
+        // Use a default avatar
+        let avatar = '<div class="avatar-sm anon-pic">?</div>';
+        if (displayName !== "Anonymous") {
+            avatar = '<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName) + '" class="avatar-sm" alt="User">';
         }
 
         let newPost = document.createElement("div");
         newPost.className = "post box";
-        if (anonToggle.checked) newPost.classList.add("anon-post");
+        if (displayName === "Anonymous") newPost.classList.add("anon-post");
 
-        const emojis = {
-            "Dreaming": "✨", "Hustle": "🔥", "Love": "💖", 
-            "Travel": "🌍", "Startup": "🚀", "Goals": "🎯"
-        };
-        let emoji = emojis[currentMood] || "✨";
+        // We will assign a random mood if backend doesn't store it
+        const emojis = ["✨ Dreaming", "🔥 Hustle", "💖 Love", "🌍 Travel", "🚀 Startup", "🎯 Goals"];
+        const colors = ["purple", "orange", "pink", "blue", "yellow", "green"];
+        
+        // Randomly pick one or just default to Dreaming if none stored
+        let randomIdx = Math.floor(Math.random() * emojis.length);
+        let emojiMood = emojis[randomIdx];
+        let color = colors[randomIdx];
+
+        // Format Date
+        let dateString = wish.createdAt ? new Date(wish.createdAt).toLocaleString() : "Just now";
 
         newPost.innerHTML = `
             <div class="post-top">
                 ${avatar}
                 <div class="post-meta">
                     <span class="author">${displayName}</span>
-                    <span class="time">Just now</span>
+                    <span class="time">${dateString}</span>
                 </div>
-                <span class="mood-badge badge-${currentMoodColor}">${emoji} ${currentMood}</span>
+                <span class="mood-badge badge-${color}">${emojiMood}</span>
             </div>
             <div class="post-body">${text}</div>
             <div class="post-bottom">
                 <div class="reactions">
-                    <button class="react-btn">👍 <span>0</span></button>
+                    <button class="react-btn like-btn" data-id="${wish._id}">👍 <span>${likesCount}</span></button>
                     <button class="react-btn">❤️ <span>0</span></button>
-                    <button class="react-btn">🔥 <span>0</span></button>
                 </div>
                 <div class="actions">
-                    <button class="action-btn"><i class="bi bi-chat"></i> Reply</button>
-                    <button class="action-btn"><i class="bi bi-share"></i> Share</button>
                     <button class="action-btn"><i class="bi bi-bookmark"></i> Save</button>
                 </div>
             </div>
         `;
 
         let composerBox = document.querySelector(".composer");
-        mainFeed.insertBefore(newPost, composerBox.nextSibling);
-
-        textarea.value = "";
-        nameInput.value = "";
-        anonToggle.checked = false;
-        updateCount();
-        handleAnon();
-        moodButtons[0].click();
         
-        setupReactions();
-        setupActions();
+        // If prepending (new post), put it right after composer
+        // If appending (loading all), put it at the end of feed
+        if (prepend && composerBox && composerBox.nextSibling) {
+            mainFeed.insertBefore(newPost, composerBox.nextSibling);
+        } else {
+            mainFeed.appendChild(newPost);
+        }
+
+        setupReactions(newPost);
+        setupActions(newPost);
     }
 
-    function setupReactions() {
-        document.querySelectorAll(".react-btn").forEach(function(btn) {
+    function setupReactions(postElement = document) {
+        postElement.querySelectorAll(".react-btn").forEach(function(btn) {
             if (!btn.dataset.ready) {
                 btn.dataset.ready = "true";
-                btn.addEventListener("click", function() {
-                    let container = this.parentElement;
-                    container.querySelectorAll(".react-btn").forEach(b => {
-                        if (b !== btn && b.classList.contains("active")) {
-                            b.classList.remove("active");
-                            b.querySelector("span").textContent = parseInt(b.querySelector("span").textContent) - 1;
-                        }
-                    });
-
+                btn.addEventListener("click", async function() {
                     let span = this.querySelector("span");
                     let val = parseInt(span.textContent);
-                    if (this.classList.contains("active")) {
-                        this.classList.remove("active");
-                        span.textContent = val - 1;
+                    
+                    // If it's the like button, call the backend
+                    if (this.classList.contains("like-btn")) {
+                        let token = localStorage.getItem("token");
+                        if (!token) {
+                            alert("Please login first to like a wish.");
+                            return;
+                        }
+                        
+                        let wishId = this.getAttribute("data-id");
+                        try {
+                            let response = await fetch(`${API_URL}/like/${wishId}`, {
+                                method: "PUT",
+                                headers: {
+                                    "Authorization": `Bearer ${token}`
+                                }
+                            });
+                            
+                            if (response.ok) {
+                                this.classList.add("active");
+                                span.textContent = val + 1;
+                            } else {
+                                let errData = await response.json();
+                                if (errData.error === "Post already liked") {
+                                    // Visual feedback only
+                                    this.classList.add("active");
+                                } else {
+                                    alert(errData.error || "Failed to like post");
+                                }
+                            }
+                        } catch (error) {
+                            console.error("Error liking post:", error);
+                        }
                     } else {
-                        this.classList.add("active");
-                        span.textContent = val + 1;
+                        // Dummy behavior for heart icon
+                        if (this.classList.contains("active")) {
+                            this.classList.remove("active");
+                            span.textContent = val - 1;
+                        } else {
+                            this.classList.add("active");
+                            span.textContent = val + 1;
+                        }
                     }
                 });
             }
         });
     }
 
-    function setupActions() {
-        document.querySelectorAll(".bi-bookmark").forEach(icon => {
+    function setupActions(postElement = document) {
+        postElement.querySelectorAll(".bi-bookmark").forEach(icon => {
             let btn = icon.parentElement;
             if (!btn.dataset.ready) {
                 btn.dataset.ready = "true";
@@ -171,6 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Init
     if (textarea) updateCount();
     if (anonToggle) handleAnon();
-    setupReactions();
-    setupActions();
+    
+    // Load wishes from DB when page loads
+    loadWishes();
 });

@@ -319,14 +319,57 @@
     </div>
 
     <script>
-      function login() {
-        let email = document.getElementById("email").value;
+      async function login() {
+        let email = document.getElementById("email").value.trim();
         let password = document.getElementById("password").value;
 
         if (email === "" || password === "") {
           alert("Please fill all fields");
-        } else {
-          alert("Login Successful");
+          return;
+        }
+
+        try {
+          // First, attempt to Login
+          let response = await fetch("http://localhost:3000/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+          });
+
+          let data = await response.json();
+
+          if (response.ok) {
+            alert("Login Successful!");
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            window.location.href = "index.html"; // Redirect to main page
+          } else if (data.error === "Invalid email") {
+            // If user doesn't exist, automatically Sign Them Up for easy testing!
+            let name = email.split('@')[0]; // Make a fake name from email
+            
+            let signupResponse = await fetch("http://localhost:3000/auth/signup", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ name: name, email: email, password: password })
+            });
+            
+            let signupData = await signupResponse.json();
+            
+            if (signupResponse.ok) {
+                alert("Account created! Please click Login again to enter.");
+            } else {
+                alert("Signup failed: " + signupData.error);
+            }
+          } else {
+            alert("Login failed: " + data.error);
+          }
+        } catch (error) {
+          console.error("Error logging in:", error);
+          alert("Could not connect to server. Make sure the backend is running!");
         }
       }
     </script>
