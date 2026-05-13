@@ -15,7 +15,9 @@ const app = express();
 connectDB();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "*",
+}));
 
 app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
