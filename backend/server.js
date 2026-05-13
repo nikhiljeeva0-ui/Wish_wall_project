@@ -21,7 +21,7 @@ app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/users", userRoutes);
 
-// home route
+
 app.get("/", (req, res) => {
   res.send("Server Running");
 });

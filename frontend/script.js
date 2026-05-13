@@ -1,7 +1,22 @@
 // script.js
 const API_URL = "http://localhost:3000/posts";
 
+// AUTH CHECK ON PAGE LOAD
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    // LOGOUT LOGIC
+    let logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        });
+    }
     let textarea = document.getElementById("wish-textarea");
     let countDisplay = document.querySelector(".count");
     let anonToggle = document.getElementById("anon-toggle");
@@ -124,6 +139,25 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    async function deleteWish(wishId, postElement) {
+        if (!confirm("Are you sure you want to delete this wish?")) return;
+        let token = localStorage.getItem("token");
+        try {
+            let response = await fetch(`${API_URL}/${wishId}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                postElement.remove();
+            } else {
+                alert("Failed to delete wish.");
+            }
+        } catch (error) {
+            console.error("Error deleting wish:", error);
+        }
+    }
+
     // HELPER FUNCTION TO DISPLAY A WISH IN THE UI
     function displayWish(wish, prepend = false) {
         // GitHub backend uses author object for name
@@ -159,6 +193,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Format Date
         let dateString = wish.createdAt ? new Date(wish.createdAt).toLocaleString() : "Just now";
 
+        let currentUser = JSON.parse(localStorage.getItem("user")) || {};
+        let isAuthor = (wish.author && wish.author._id === currentUser._id) || (wish.authorId === currentUser._id);
+
+        let deleteHtml = isAuthor ? `<button class="action-btn delete-btn" style="color: #ef4444;"><i class="bi bi-trash"></i> Delete</button>` : '';
+
         newPost.innerHTML = `
             <div class="post-top">
                 ${avatar}
@@ -175,10 +214,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     <button class="react-btn">❤️ <span>0</span></button>
                 </div>
                 <div class="actions">
+                    ${deleteHtml}
                     <button class="action-btn"><i class="bi bi-bookmark"></i> Save</button>
                 </div>
             </div>
         `;
+
+        if (isAuthor) {
+            let deleteBtn = newPost.querySelector(".delete-btn");
+            if (deleteBtn) {
+                deleteBtn.addEventListener("click", function() {
+                    deleteWish(wish._id, newPost);
+                });
+            }
+        }
 
         let composerBox = document.querySelector(".composer");
         

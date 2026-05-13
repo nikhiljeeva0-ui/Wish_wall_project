@@ -1,0 +1,232 @@
+/* Simple CSS rules for beginner-friendly style */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #fce7f3; /* Soft pink background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.main-container {
+    display: flex;
+    width: 900px;
+    max-width: 95%;
+    background-color: white;
+    border-radius: 20px; /* Rounded corners */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    overflow: hidden;
+    min-height: 600px;
+}
+
+/* Left Side Visual Section */
+.left-side {
+    flex: 1;
+    background: linear-gradient(135deg, #fbcfe8, #d8b4fe); /* Soft pink to light purple */
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #4c1d95; /* Deep purple text for contrast */
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.welcome-text h1 {
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.welcome-text p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.illustration {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.circle-graphic {
+    font-size: 80px;
+    background-color: white;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Circle shape */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Right Side Login Form */
+.right-side {
+    flex: 1;
+    padding: 50px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card {
+    width: 100%;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Error and Success Messages */
+.error-message {
+    color: #e11d48;
+    background-color: #ffe4e6;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none; /* Hidden by default */
+}
+
+.success-message {
+    color: #059669;
+    background-color: #d1fae5;
+}
+
+/* Inputs */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #555;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #d8b4fe; /* Highlight border with purple */
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+}
+
+.eye-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+}
+
+/* Links */
+.links-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.text-link {
+    background: none;
+    border: none;
+    color: #d8b4fe;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Buttons */
+.primary-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #d8b4fe; /* Light purple */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(216, 180, 254, 0.3);
+    transition: background-color 0.3s;
+}
+
+.primary-btn:hover {
+    background-color: #c084fc; /* Darker purple on hover */
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: white;
+    color: #555;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 25px;
+    transition: background-color 0.3s;
+}
+
+.secondary-btn:hover {
+    background-color: #f9f9f9;
+}
+
+.switch-form {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Responsive Design for Tablet / Phone */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .left-side {
+        padding: 30px;
+    }
+    
+    .illustration {
+        display: none; /* Hide illustration to save space */
+    }
+    
+    .right-side {
+        padding: 30px 20px;
+    }
+}

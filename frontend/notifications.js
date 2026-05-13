@@ -1,3 +1,21 @@
+// AUTH CHECK ON PAGE LOAD
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // LOGOUT LOGIC
+    let logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        });
+    }
+});
+
 // notifications.js
 document.addEventListener("DOMContentLoaded", function () {
     let markReadBtn = document.getElementById("mark-read-btn");

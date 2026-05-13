@@ -122,6 +122,13 @@ const likePost = ({ postId, userId }) => {
   return mapPost(post);
 };
 
+const deleteLocalPost = (postId) => {
+  const index = posts.findIndex(post => post._id === postId);
+  if (index !== -1) {
+    posts.splice(index, 1);
+  }
+};
+
 module.exports = {
   sanitizeUser,
   createUser,
@@ -133,4 +140,5 @@ module.exports = {
   listPosts,
   findPostById,
   likePost,
+  deleteLocalPost,
 };

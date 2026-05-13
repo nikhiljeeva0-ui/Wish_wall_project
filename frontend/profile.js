@@ -1,4 +1,19 @@
+// AUTH CHECK ON PAGE LOAD
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
+    // LOGOUT LOGIC
+    let logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        });
+    }
 
     // TAB SWITCHING
     let tabs = document.querySelectorAll(".p-tab");
@@ -34,55 +49,58 @@ document.addEventListener("DOMContentLoaded", async function () {
         const posts = await res.json();
 
         const myPosts = posts.filter(
-            (post) => post.author._id === currentUser._id
+            (post) => post.author && post.author._id === currentUser._id
         );
 
         const container = document.getElementById("profilePosts");
 
         if (myPosts.length === 0) {
-            container.innerHTML = `
-                <div class="feed-footer">
-                    No wishes posted yet.
-                </div>
-            `;
+            if (container) {
+                container.innerHTML = `
+                    <div class="feed-footer">
+                        No wishes posted yet.
+                    </div>
+                `;
+            }
             return;
         }
 
-        myPosts.forEach((post) => {
+        if (container) {
+            myPosts.forEach((post) => {
+                container.innerHTML += `
+                    <div class="post box">
 
-            container.innerHTML += `
-                <div class="post box">
+                        <div class="post-top">
 
-                    <div class="post-top">
+                            <img 
+                                src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.name}" 
+                                class="avatar-sm"
+                            >
 
-                        <img 
-                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.name}" 
-                            class="avatar-sm"
-                        >
+                            <div class="post-meta">
+                                <span class="author">
+                                    ${post.author.name}
+                                </span>
 
-                        <div class="post-meta">
-                            <span class="author">
-                                ${post.author.name}
-                            </span>
+                                <span class="time">
+                                    ${new Date(post.createdAt).toLocaleDateString()}
+                                </span>
+                            </div>
 
-                            <span class="time">
-                                ${new Date(post.createdAt).toLocaleDateString()}
-                            </span>
+                        </div>
+
+                        <div class="post-body">
+                            ${post.content}
+                        </div>
+
+                        <div class="post-bottom">
+                            ❤️ ${post.likes.length} Likes
                         </div>
 
                     </div>
-
-                    <div class="post-body">
-                        ${post.content}
-                    </div>
-
-                    <div class="post-bottom">
-                        ❤️ ${post.likes.length} Likes
-                    </div>
-
-                </div>
-            `;
-        });
+                `;
+            });
+        }
 
     } catch (err) {
         console.log(err);

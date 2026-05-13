@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garuda WishWall - Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Side Visual Section -->
+        <div class="left-side">
+            <div class="logo">✨ GARUDA WishWall</div>
+            <div class="welcome-text">
+                <h1>Welcome Back!</h1>
+                <p>Join our beautiful community to share your dreams and read inspiring wishes from around the world.</p>
+            </div>
+            <div class="illustration">
+                <div class="circle-graphic">✨</div>
+            </div>
+        </div>
+
+        <!-- Right Side Login / Signup Form -->
+        <div class="right-side">
+            
+            <!-- Login Card -->
+            <div class="card" id="login-card">
+                <h2>Login to your account</h2>
+                
+                <div class="error-message" id="login-error"></div>
+                
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" placeholder="Enter your password">
+                        <button type="button" class="eye-btn" id="login-eye">Show</button>
+                    </div>
+                </div>
+                
+                <div class="links-row">
+                    <button type="button" class="text-link" id="forgot-btn">Forgot Password?</button>
+                </div>
+
+                <button class="primary-btn" id="login-btn">Login</button>
+                <button class="secondary-btn" id="guest-btn">Continue as Guest</button>
+
+                <div class="switch-form">
+                    Don't have an account? <button type="button" class="text-link" id="show-signup-btn">Create Account</button>
+                </div>
+            </div>
+
+            <!-- Signup Card (Hidden by default) -->
+            <div class="card" id="signup-card" style="display: none;">
+                <h2>Create an Account</h2>
+                
+                <div class="error-message" id="signup-error"></div>
+                
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Enter your full name">
+                </div>
+                
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="signup-email" placeholder="Enter your email">
+                </div>
+                
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="signup-password" placeholder="Create a password">
+                        <button type="button" class="eye-btn" id="signup-eye">Show</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="signup-confirm" placeholder="Confirm your password">
+                        <button type="button" class="eye-btn" id="confirm-eye">Show</button>
+                    </div>
+                </div>
+
+                <button class="primary-btn" id="signup-btn">Create Account</button>
+
+                <div class="switch-form">
+                    Already have an account? <button type="button" class="text-link" id="show-login-btn">Login</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <script src="login.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@ const {
   listPosts: listLocalPosts,
   findPostById: findLocalPostById,
   likePost: likeLocalPost,
+  deletePost: deleteLocalPost,
 } = require("../utils/localStore");
 
 const isMongoReady = () => mongoose.connection.readyState === 1;
@@ -121,8 +122,38 @@ const likePost = async (req, res) => {
   }
 };
 
+const deletePost = async (req, res) => {
+  try {
+    if (!isMongoReady()) {
+      const post = findLocalPostById(req.params.id);
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      if (post.authorId !== req.user.userId) {
+        return res.status(403).json({ error: "Not authorized to delete this post" });
+      }
+      deleteLocalPost(req.params.id);
+      return res.status(200).json({ message: "Post deleted" });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    if (post.author.toString() !== req.user.userId) {
+      return res.status(403).json({ error: "Not authorized to delete this post" });
+    }
+
+    await Post.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Post deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   createPost,
   getAllPosts,
   likePost,
+  deletePost
 };

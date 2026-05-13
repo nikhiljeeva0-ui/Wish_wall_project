@@ -1,3 +1,21 @@
+// AUTH CHECK ON PAGE LOAD
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // LOGOUT LOGIC
+    let logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        });
+    }
+});
+
 // newwish.js
 document.addEventListener("DOMContentLoaded", function () {
     let textarea = document.getElementById("nw-text");
@@ -37,45 +55,42 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     if (postBtn) {
-    postBtn.addEventListener("click", async function () {
-
-        if (textarea.value.trim() === "") {
-            alert("Please write your wish first.");
-            return;
-        }
-
-        try {
-
-            const token = localStorage.getItem("token");
-
-            const res = await fetch("http://localhost:3000/posts", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    content: textarea.value,
-                }),
-            });
-
-            const data = await res.json();
-
-            console.log(data);
-
-            if (res.ok) {
-                alert("Wish published successfully!");
-                window.location.href = "profile.html";
-            } else {
-                alert(data.error || "Failed to create wish");
+        postBtn.addEventListener("click", async function() {
+            let text = textarea.value.trim();
+            if (text === "") {
+                alert("Please write your wish first.");
+                return;
+            } 
+            
+            let token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please login first.");
+                window.location.href = "login.html";
+                return;
             }
+            
+            try {
+                let response = await fetch("http://localhost:3000/posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content: text })
+                });
 
-        } catch (err) {
-            console.log(err);
-            alert("Server error");
-        }
-    });
-}
+                if (response.ok) {
+                    alert("Wish published!");
+                    window.location.href = "index.html";
+                } else {
+                    let errData = await response.json();
+                    alert(errData.error || "Failed to publish wish.");
+                }
+            } catch (err) {
+                alert("Error connecting to server.");
+            }
+        });
+    }
 
     if (draftBtn) {
         draftBtn.addEventListener("click", function() {
