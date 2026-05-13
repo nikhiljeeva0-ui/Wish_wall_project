@@ -37,15 +37,45 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     if (postBtn) {
-        postBtn.addEventListener("click", function() {
-            if (textarea.value.trim() === "") {
-                alert("Please write your wish first.");
+    postBtn.addEventListener("click", async function () {
+
+        if (textarea.value.trim() === "") {
+            alert("Please write your wish first.");
+            return;
+        }
+
+        try {
+
+            const token = localStorage.getItem("token");
+
+            const res = await fetch("http://localhost:3000/posts", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    content: textarea.value,
+                }),
+            });
+
+            const data = await res.json();
+
+            console.log(data);
+
+            if (res.ok) {
+                alert("Wish published successfully!");
+                window.location.href = "profile.html";
             } else {
-                alert("Wish published! (Dummy action)");
-                window.location.href = "index.html";
+                alert(data.error || "Failed to create wish");
             }
-        });
-    }
+
+        } catch (err) {
+            console.log(err);
+            alert("Server error");
+        }
+    });
+}
 
     if (draftBtn) {
         draftBtn.addEventListener("click", function() {
