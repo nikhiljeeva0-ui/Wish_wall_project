@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             localStorage.getItem("user")
         );
 
-        const res = await fetch("http://localhost:3000/posts");
+        const res = await fetch("https://wish-wall-d30y.onrender.com");
 
         const posts = await res.json();
 
