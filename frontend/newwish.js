@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             
             try {
-                let response = await fetch("http://localhost:3000/posts", {
+                let response = await fetch("https://wish-wall-d30y.onrender.com", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
