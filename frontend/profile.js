@@ -116,7 +116,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (!container) return;
 
             if (myPosts.length === 0) {
-                container.innerHTML = '<div class="feed-footer">No wishes posted yet.</div>';
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 40px; color: gray;">
+                        <i class="bi bi-wind" style="font-size: 3rem; display: block; margin-bottom: 10px;"></i>
+                        <p>You haven't made any wishes yet.</p>
+                        <a href="newwish.html" class="btn-follow" style="text-decoration:none; display:inline-block; margin-top:10px;">Create your first wish</a>
+                    </div>`;
                 return;
             }
 
