@@ -148,7 +148,7 @@ async function handleSignup() {
     }
     
     try {
-        var response = await fetch(API_BASE + "/auth/signup", {
+        var response = await fetch(API_BASE + "/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, email: email, password: password })
