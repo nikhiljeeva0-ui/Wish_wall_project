@@ -1,0 +1,11 @@
+{
+  "name": "wish-wall-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Garuda WishWall",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx browser-sync start --server --files '*.html, *.css, *.js'"
+  },
+  "author": "Nikhil Jeeva",
+  "license": "MIT"
+}
