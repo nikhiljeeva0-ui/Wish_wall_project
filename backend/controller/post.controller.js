@@ -1,4 +1,5 @@
 const Post = require("../models/post.model");
+const Comment = require("../models/comment.model");
 const mongoose = require("mongoose");
 
 const {
@@ -6,7 +7,10 @@ const {
   listPosts: listLocalPosts,
   findPostById: findLocalPostById,
   likePost: likeLocalPost,
-  deletePost: deleteLocalPost,
+  deleteLocalPost,
+  unlikeLocalPost,
+  createLocalComment,
+  listLocalComments,
 } = require("../utils/localStore");
 
 const isMongoReady = () => mongoose.connection.readyState === 1;
@@ -151,9 +155,104 @@ const deletePost = async (req, res) => {
   }
 };
 
+const unlikePost = async (req, res) => {
+  try {
+    if (!isMongoReady()) {
+      const post = findLocalPostById(req.params.id);
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      if (!post.likes.includes(req.user.userId)) {
+        return res.status(400).json({ error: "Post not liked yet" });
+      }
+      return res.status(200).json({
+        message: "Post unliked",
+        post: unlikeLocalPost({ postId: req.params.id, userId: req.user.userId }),
+      });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    if (!post.likes.some((userId) => userId.toString() === req.user.userId)) {
+      return res.status(400).json({ error: "Post not liked yet" });
+    }
+
+    post.likes = post.likes.filter((userId) => userId.toString() !== req.user.userId);
+    await post.save();
+
+    res.status(200).json({ message: "Post unliked", post });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const commentOnPost = async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "Content is required" });
+    }
+
+    if (!isMongoReady()) {
+      const post = findLocalPostById(req.params.id);
+      if (!post) return res.status(404).json({ error: "Post not found" });
+
+      const comment = createLocalComment({
+        postId: req.params.id,
+        authorId: req.user.userId,
+        content: content.trim(),
+      });
+      return res.status(201).json({ message: "Comment added", comment });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const comment = await Comment.create({
+      content: content.trim(),
+      author: req.user.userId,
+      post: req.params.id,
+    });
+
+    await comment.populate("author", "name email");
+
+    res.status(201).json({ message: "Comment added", comment });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getPostComments = async (req, res) => {
+  try {
+    if (!isMongoReady()) {
+      const post = findLocalPostById(req.params.id);
+      if (!post) return res.status(404).json({ error: "Post not found" });
+      
+      const comments = listLocalComments(req.params.id);
+      return res.status(200).json(comments);
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const comments = await Comment.find({ post: req.params.id })
+      .populate("author", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(comments);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   createPost,
   getAllPosts,
   likePost,
-  deletePost
+  deletePost,
+  unlikePost,
+  commentOnPost,
+  getPostComments,
 };
