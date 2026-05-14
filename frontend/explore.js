@@ -85,7 +85,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                     headers: { "Authorization": "Bearer " + token }
                 });
                 let meData = await meResponse.json();
-                let myFollowing = meData.user ? meData.user.following : [];
+                
+                // CRITICAL FIX: The backend populates 'following', so it's an array of objects.
+                // We need to turn it into an array of IDs so .includes() works correctly.
+                let myFollowing = [];
+                if (meData.user && meData.user.following) {
+                    myFollowing = meData.user.following.map(f => typeof f === 'object' ? f._id : f);
+                }
 
                 otherUsers.forEach(u => {
                     let isFollowing = myFollowing.includes(u._id);

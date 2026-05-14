@@ -24,10 +24,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (moodButtons.length > 0) {
         moodButtons.forEach(btn => {
             btn.addEventListener("click", function() {
+                // 1. Remove "active" from all buttons, add to clicked one
                 moodButtons.forEach(b => b.classList.remove("active"));
                 this.classList.add("active");
+                
+                // 2. Save the color and text so we can send it to backend
                 selectedColor = this.getAttribute("data-color");
-                selectedEmoji = this.innerText;
+                selectedEmoji = this.innerText.trim();
+                
+                console.log("Mood Selected:", selectedEmoji, selectedColor);
             });
         });
     }
@@ -171,7 +176,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     <button class="action-btn" onclick="toggleComments('${post._id}')">💬 Comments</button>
                 </div>
                 <div class="actions">
-                    ${deleteBtnHTML}
                     <button class="action-btn" onclick="toggleBookmark('${post._id}', this)">🔖 Save</button>
                 </div>
             </div>

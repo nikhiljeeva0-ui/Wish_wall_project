@@ -133,13 +133,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (response.ok) {
                     console.log("Server Updated Successfully:", data.user);
                     
-                    // Update localStorage with the real data from DB
+                    // CRITICAL: Update localStorage so other pages see the new name/avatar
                     localStorage.setItem("user", JSON.stringify(data.user)); 
                     
                     alert("Profile successfully updated!");
-                    window.location.href = "profile.html";
+                    window.location.href = "profile.html"; 
                 } else {
-                    console.error("Update failed:", data.error);
                     alert(data.error || "Failed to update profile");
                 }
             } catch(e) {
