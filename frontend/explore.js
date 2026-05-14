@@ -1,23 +1,8 @@
 // explore.js
 const API_URL = window.API_URL || "http://localhost:3000";
-
-// 1. AUTH CHECK
 const token = localStorage.getItem("token");
-if (!token) {
-    window.location.href = "login.html";
-}
 
 document.addEventListener("DOMContentLoaded", async function () {
-    // 2. LOGOUT LOGIC
-    let logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        });
-    }
 
     let filterBtns = document.querySelectorAll(".explore-moods .mood-tag");
     let exploreFeed = document.getElementById("explore-feed");
@@ -65,37 +50,40 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (!userListDiv) return;
 
         try {
+            // 1. Get current logged-in user from localStorage to hide them
             let currentUser = JSON.parse(localStorage.getItem("user"));
+            
+            // 2. Fetch all registered users from DB
             let response = await fetch(API_URL + "/users");
 
             if (response.ok) {
                 let allUsers = await response.json();
-                userListDiv.innerHTML = ""; // clear dummies
+                userListDiv.innerHTML = ""; // Clear any demo/fake users
 
-                // Don't show myself
+                // 3. Filter out the logged-in user (Self User Hide)
                 let otherUsers = allUsers.filter(u => u._id !== currentUser._id);
 
                 if (otherUsers.length === 0) {
-                    userListDiv.innerHTML = "<p style='font-size:12px; color:gray;'>No other users found.</p>";
+                    userListDiv.innerHTML = "<p style='font-size:12px; color:gray; padding:10px;'>No other users found.</p>";
                     return;
                 }
 
-                // Get current user's updated following list
+                // 4. Get fresh following data for the current user to set button states
                 let meResponse = await fetch(API_URL + "/users/me", {
                     headers: { "Authorization": "Bearer " + token }
                 });
                 let meData = await meResponse.json();
                 
-                // CRITICAL FIX: The backend populates 'following', so it's an array of objects.
-                // We need to turn it into an array of IDs so .includes() works correctly.
                 let myFollowing = [];
                 if (meData.user && meData.user.following) {
+                    // Normalize to IDs
                     myFollowing = meData.user.following.map(f => typeof f === 'object' ? f._id : f);
                 }
 
                 otherUsers.forEach(u => {
+                    // Check if already following
                     let isFollowing = myFollowing.includes(u._id);
-                    let btnText = isFollowing ? "Unfollow" : "Follow";
+                    let btnText = isFollowing ? "Following" : "Follow";
                     let btnClass = isFollowing ? "btn-follow active" : "btn-follow";
 
                     let userRow = document.createElement("div");
@@ -117,9 +105,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // 5. HELPER: CREATE POST HTML
+    // 5. HELPER: CREATE POST HTML (REAL DATA)
     function createExplorePostHTML(post) {
-        let displayName = post.author ? post.author.name : "Anonymous";
+        let displayName = post.author ? post.author.name : "Unknown User";
         let likesCount = post.likes ? post.likes.length : 0;
         
         let displayContent = post.content || "";
@@ -127,6 +115,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         let color = "purple";
         let moodWord = "Dreaming";
 
+        // Extract mood and color from content string (Format: "Text|||color|||emoji")
         if (displayContent.includes("|||")) {
             let parts = displayContent.split("|||");
             displayContent = parts[0];
@@ -135,36 +124,39 @@ document.addEventListener("DOMContentLoaded", async function () {
                 emojiMood = parts[2];
                 moodWord = emojiMood.split(" ")[1] || "Dreaming";
             }
-        } else {
-            const emojis = ["✨ Dreaming", "🔥 Hustle", "💖 Love", "🌍 Travel", "🚀 Startup", "🎯 Goals"];
-            const colors = ["purple", "orange", "pink", "blue", "yellow", "green"];
-            let randomIdx = Math.floor(Math.random() * emojis.length);
-            emojiMood = emojis[randomIdx];
-            color = colors[randomIdx];
-            moodWord = emojiMood.split(" ")[1];
         }
 
-        let avatar = `<img src="${post.author && post.author.avatar ? post.author.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName)}" class="avatar-sm" alt="User">`;
-            
-        let dateString = post.createdAt ? new Date(post.createdAt).toLocaleString() : "Just now";
+        // Handle Anonymous
+        if (post.isAnonymous) {
+            displayName = "Anonymous";
+        }
+
+        let avatarSrc = post.author && post.author.avatar ? post.author.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName);
+        if (post.isAnonymous) avatarSrc = "https://api.dicebear.com/7.x/avataaars/svg?seed=Anonymous";
+
+        let dateString = post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "Just now";
 
         let newPost = document.createElement("div");
         newPost.className = "post box";
         newPost.setAttribute("data-mood", moodWord);
         
         newPost.innerHTML = `
-            <div class="post-top">
-                ${avatar}
-                <div class="post-meta">
-                    <span class="author">${displayName}</span>
-                    <span class="time">${dateString}</span>
+            <div class="post-top" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${avatarSrc}" class="avatar-sm" style="width: 32px; height: 32px;">
+                    <div class="post-meta">
+                        <span class="author" style="font-weight: 600; font-size: 14px; display: block;">${displayName}</span>
+                        <span class="time" style="font-size: 10px; color: #8e8e8e;">${dateString}</span>
+                    </div>
                 </div>
                 <span class="mood-badge badge-${color}">${emojiMood}</span>
             </div>
-            <div class="post-body">${displayContent}</div>
-            <div class="post-bottom">
+            <div class="post-body" style="padding: 0 15px 12px; font-size: 15px;">${displayContent}</div>
+            <div class="post-bottom" style="padding: 0 15px 15px;">
                 <div class="reactions">
-                    <button class="react-btn like-btn" onclick="toggleLike('${post._id}', this)">👍 <span>${likesCount}</span></button>
+                    <button class="react-btn like-btn" style="background:none; border:1px solid #efefef; border-radius:20px; padding: 5px 12px; cursor:pointer;" onclick="toggleLike('${post._id}', this)">
+                        👍 <span>${likesCount}</span>
+                    </button>
                 </div>
             </div>
         `;
@@ -174,8 +166,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // 6. GLOBAL FUNCTIONS FOR INLINE ONCLICK (FOLLOW & LIKE)
     window.toggleFollow = async function(userId, buttonElement) {
-        let isFollowing = buttonElement.innerText === "Unfollow";
-        let endpoint = isFollowing ? "/users/unfollow/" : "/users/follow/";
+        // Toggle logic based on current button text
+        let isCurrentlyFollowing = buttonElement.innerText.trim() === "Following";
+        let endpoint = isCurrentlyFollowing ? "/users/unfollow/" : "/users/follow/";
 
         try {
             let res = await fetch(API_URL + endpoint + userId, {
@@ -187,18 +180,26 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
 
             if (res.ok) {
-                if (isFollowing) {
+                // Success: Update button state immediately
+                if (isCurrentlyFollowing) {
                     buttonElement.innerText = "Follow";
                     buttonElement.classList.remove("active");
                 } else {
-                    buttonElement.innerText = "Unfollow";
+                    buttonElement.innerText = "Following";
                     buttonElement.classList.add("active");
                 }
-                // Optional: Refresh users to update counts if displayed
-                // loadUsers(); 
+                
+                // Update local storage user data
+                let meRes = await fetch(API_URL + "/users/me", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                let meData = await meRes.json();
+                if (meData.user) {
+                    localStorage.setItem("user", JSON.stringify(meData.user));
+                }
             } else {
                 let errData = await res.json();
-                console.error("Follow error:", errData.error);
+                alert(errData.error || "Something went wrong");
             }
         } catch (err) {
             console.log("Error toggling follow:", err);

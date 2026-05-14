@@ -97,7 +97,10 @@ const followUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (!user.following.includes(userToFollowId)) {
+    // Check if already following (convert to string for comparison)
+    const isFollowing = user.following.some(id => id.toString() === userToFollowId);
+
+    if (!isFollowing) {
       user.following.push(userToFollowId);
       userToFollow.followers.push(req.user.userId);
       await user.save();
@@ -121,6 +124,7 @@ const unfollowUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Remove from following/followers
     user.following = user.following.filter(id => id.toString() !== userToUnfollowId);
     userToUnfollow.followers = userToUnfollow.followers.filter(id => id.toString() !== req.user.userId);
 
@@ -144,7 +148,10 @@ const bookmarkPost = async (req, res) => {
       return res.status(404).json({ error: "User or Post not found" });
     }
 
-    if (user.bookmarks.includes(postId)) {
+    // Use robust ID comparison
+    const isBookmarked = user.bookmarks.some(id => id.toString() === postId);
+
+    if (isBookmarked) {
       user.bookmarks = user.bookmarks.filter(id => id.toString() !== postId);
     } else {
       user.bookmarks.push(postId);

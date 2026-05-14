@@ -19,57 +19,33 @@ const signup = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({
-        error: "Name, email, and password are required",
-      });
-    }
-
-    if (!isMongoReady()) {
-      const existingUser = findUserByEmail(email);
-
-      if (existingUser) {
-        return res.status(400).json({
-          error: "Email already exists",
-        });
-      }
-
-      const hashPassword = await bcrypt.hash(password, 10);
-      const user = createLocalUser({
-        name: name.trim(),
-        email: email.trim(),
-        password: hashPassword,
-      });
-
-      return res.status(201).json({
-        message: "Signup successful",
-        user: sanitizeUser(user),
-      });
+      return res.status(400).json({ error: "Name, email, and password are required" });
     }
 
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
-      return res.status(400).json({
-        error: "Email already exists",
-      });
+      return res.status(400).json({ error: "Email already exists" });
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
       password: hashPassword,
     });
 
     res.status(201).json({
       message: "Signup successful",
-      user: sanitizeUser(user),
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+        avatar: user.avatar
+      }
     });
   } catch (err) {
-    res.status(500).json({
-      error: err.message,
-    });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -78,96 +54,41 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        error: "Email and password are required",
-      });
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
-    if (!isMongoReady()) {
-      const user = findUserByEmail(email);
-
-      if (!user) {
-        return res.status(400).json({
-          error: "Invalid email",
-        });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        return res.status(400).json({
-          error: "Invalid password",
-        });
-      }
-
-      const token = jwt.sign(
-        {
-          userId: user._id,
-        },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "7d",
-        }
-      );
-
-      return res.status(200).json({
-        message: "Login successful",
-        token,
-        user: sanitizeUser(user),
-      });
-    }
-
-    const user = await User.findOne({ email });
-
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
     if (!user) {
-      return res.status(400).json({
-        error: "Invalid email",
-      });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
-
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({
-        error: "Invalid password",
-      });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      {
-        userId: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     res.status(200).json({
       message: "Login successful",
       token,
-      user: sanitizeUser(user),
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+        avatar: user.avatar,
+        followers: user.followers,
+        following: user.following
+      }
     });
   } catch (err) {
-    res.status(500).json({
-      error: err.message,
-    });
+    res.status(500).json({ error: err.message });
   }
 };
 
 const authCheck = async (req, res) => {
   try {
-    if (!isMongoReady()) {
-      const user = findUserById(req.user.userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      return res.status(200).json({ user: sanitizeUser(user) });
-    }
-
     const user = await User.findById(req.user.userId).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });

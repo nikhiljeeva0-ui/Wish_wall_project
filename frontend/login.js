@@ -1,3 +1,4 @@
+// login.js
 // HTML Elements for Login Card
 var loginCard = document.querySelector("#login-card");
 var loginEmailInput = document.querySelector("#login-email");
@@ -21,9 +22,9 @@ var signupEyeBtn = document.querySelector("#signup-eye");
 var confirmEyeBtn = document.querySelector("#confirm-eye");
 var showLoginBtn = document.querySelector("#show-login-btn");
 
-var API_BASE = window.API_URL || "http://localhost:3000";
+var API_URL = window.API_URL || "http://localhost:3000";
 
-// Check if already logged in
+// 1. AUTH CHECK: If already logged in, go to index.html
 if (localStorage.getItem("token")) {
     window.location.href = "index.html";
 }
@@ -32,8 +33,6 @@ if (localStorage.getItem("token")) {
 function showSignupForm() {
     loginCard.style.display = "none";
     signupCard.style.display = "block";
-    
-    // Clear any existing error messages
     loginError.style.display = "none";
     signupError.style.display = "none";
 }
@@ -42,8 +41,6 @@ function showSignupForm() {
 function showLoginForm() {
     signupCard.style.display = "none";
     loginCard.style.display = "block";
-    
-    // Clear any existing error messages
     loginError.style.display = "none";
     signupError.style.display = "none";
 }
@@ -59,26 +56,20 @@ function togglePassword(inputElement, buttonElement) {
     }
 }
 
-// Simple function to handle Login button click
+// 2. REAL LOGIN
 async function handleLogin() {
     var email = loginEmailInput.value.trim();
     var password = loginPasswordInput.value;
 
-    if (email === "") {
-        loginError.textContent = "Please enter email";
-        loginError.style.display = "block";
-        loginError.classList.remove("success-message");
-        return;
-    } 
-    if (password === "") {
-        loginError.textContent = "Please enter password";
+    if (!email || !password) {
+        loginError.textContent = "Please enter email and password";
         loginError.style.display = "block";
         loginError.classList.remove("success-message");
         return;
     }
     
     try {
-        var response = await fetch(API_BASE + "/auth/login", {
+        var response = await fetch(API_URL + "/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: email, password: password })
@@ -91,6 +82,7 @@ async function handleLogin() {
             loginError.style.display = "block";
             loginError.classList.add("success-message");
             
+            // Save to localStorage
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
             
@@ -98,44 +90,26 @@ async function handleLogin() {
                 window.location.href = "index.html";
             }, 1000);
         } else {
-            loginError.textContent = data.error || "Login failed";
+            loginError.textContent = data.error || "Invalid email or password";
             loginError.style.display = "block";
             loginError.classList.remove("success-message");
         }
     } catch (err) {
-        loginError.textContent = "Cannot connect to server";
+        loginError.textContent = "Cannot connect to server. Make sure backend is running.";
         loginError.style.display = "block";
         loginError.classList.remove("success-message");
     }
 }
 
-// Simple function to handle Create Account button click
+// 3. REAL SIGNUP
 async function handleSignup() {
     var name = signupNameInput.value.trim();
     var email = signupEmailInput.value.trim();
     var password = signupPasswordInput.value;
     var confirmPassword = signupConfirmInput.value;
 
-    if (name === "") {
-        signupError.textContent = "Please enter your full name";
-        signupError.style.display = "block";
-        signupError.classList.remove("success-message");
-        return;
-    } 
-    if (email === "") {
-        signupError.textContent = "Please enter email";
-        signupError.style.display = "block";
-        signupError.classList.remove("success-message");
-        return;
-    } 
-    if (password === "") {
-        signupError.textContent = "Please enter a password";
-        signupError.style.display = "block";
-        signupError.classList.remove("success-message");
-        return;
-    } 
-    if (confirmPassword === "") {
-        signupError.textContent = "Please confirm your password";
+    if (!name || !email || !password) {
+        signupError.textContent = "All fields are required";
         signupError.style.display = "block";
         signupError.classList.remove("success-message");
         return;
@@ -148,7 +122,7 @@ async function handleSignup() {
     }
     
     try {
-        var response = await fetch(API_BASE + "/auth/register", {
+        var response = await fetch(API_URL + "/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: name, email: email, password: password })
@@ -157,7 +131,7 @@ async function handleSignup() {
         var data = await response.json();
         
         if (response.ok) {
-            signupError.textContent = "Account created! You can now login.";
+            signupError.textContent = "Account created! Please login.";
             signupError.style.display = "block";
             signupError.classList.add("success-message");
             
@@ -171,51 +145,29 @@ async function handleSignup() {
             signupError.classList.remove("success-message");
         }
     } catch (err) {
-        signupError.textContent = "Cannot connect to server";
+        signupError.textContent = "Cannot connect to server.";
         signupError.style.display = "block";
         signupError.classList.remove("success-message");
     }
 }
 
-// Simple function for Forgot Password link
+// 4. GUEST LOGIN
+function handleGuest() {
+    alert("Guest mode disabled. Please create a real account.");
+}
+
 function showForgotPassword() {
     alert("Password reset feature coming soon");
 }
 
-// Simple function for Guest Login button
-function handleGuest() {
-    loginError.textContent = "Logging in as guest...";
-    loginError.style.display = "block";
-    loginError.classList.add("success-message");
-    
-    // Clear token to be safe
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    
-    setTimeout(function() {
-        window.location.href = "index.html";
-    }, 1000);
-}
+// Add Event Listeners
+if(showSignupBtn) showSignupBtn.addEventListener("click", showSignupForm);
+if(showLoginBtn) showLoginBtn.addEventListener("click", showLoginForm);
+if(loginBtn) loginBtn.addEventListener("click", handleLogin);
+if(signupBtn) signupBtn.addEventListener("click", handleSignup);
+if(forgotBtn) forgotBtn.addEventListener("click", showForgotPassword);
+if(guestBtn) guestBtn.addEventListener("click", handleGuest);
 
-// Add Event Listeners for switching forms
-showSignupBtn.addEventListener("click", showSignupForm);
-showLoginBtn.addEventListener("click", showLoginForm);
-
-// Add Event Listeners for buttons
-loginBtn.addEventListener("click", handleLogin);
-signupBtn.addEventListener("click", handleSignup);
-forgotBtn.addEventListener("click", showForgotPassword);
-guestBtn.addEventListener("click", handleGuest);
-
-// Add Event Listeners for eye buttons to toggle password
-loginEyeBtn.addEventListener("click", function() {
-    togglePassword(loginPasswordInput, loginEyeBtn);
-});
-
-signupEyeBtn.addEventListener("click", function() {
-    togglePassword(signupPasswordInput, signupEyeBtn);
-});
-
-confirmEyeBtn.addEventListener("click", function() {
-    togglePassword(signupConfirmInput, confirmEyeBtn);
-});
+if(loginEyeBtn) loginEyeBtn.addEventListener("click", function() { togglePassword(loginPasswordInput, loginEyeBtn); });
+if(signupEyeBtn) signupEyeBtn.addEventListener("click", function() { togglePassword(signupPasswordInput, signupEyeBtn); });
+if(confirmEyeBtn) confirmEyeBtn.addEventListener("click", function() { togglePassword(signupConfirmInput, confirmEyeBtn); });

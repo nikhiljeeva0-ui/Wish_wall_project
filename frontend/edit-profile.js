@@ -1,23 +1,7 @@
 // edit-profile.js
 const API_URL = window.API_URL || "http://localhost:3000";
 
-// 1. AUTH CHECK
-const token = localStorage.getItem("token");
-if (!token) {
-    window.location.href = "login.html";
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-    // 2. LOGOUT LOGIC
-    let logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        });
-    }
 
     // Elements
     let nameInput = document.getElementById("edit-name");
@@ -99,21 +83,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // 5. SAVE BUTTON LOGIC (UPDATE PROFILE)
     if (saveBtn) {
         saveBtn.addEventListener("click", async function(e) {
-            e.preventDefault(); // Prevent any form submission refresh
+            e.preventDefault();
             
             let newName = nameInput.value.trim();
-            let newEmail = usernameInput.value.trim();
             let newBio = bioInput.value.trim();
             let newAvatar = previewAvatar ? previewAvatar.src : "";
 
-            console.log("Saving Profile Data:", { newName, newEmail, newBio, newAvatar });
-
-            if (!newName || !newEmail) {
-                alert("Name and Email are required!");
+            if (!newName) {
+                alert("Name is required!");
                 return;
             }
 
             try {
+                // Send update to backend
                 let response = await fetch(API_URL + "/users/me", {
                     method: "PUT",
                     headers: {
@@ -122,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     body: JSON.stringify({ 
                         name: newName, 
-                        email: newEmail,
                         bio: newBio,
                         avatar: newAvatar
                     })
@@ -131,21 +112,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 let data = await response.json();
 
                 if (response.ok) {
-                    console.log("Server Updated Successfully:", data.user);
-                    
-                    // 1. Update localStorage so other pages see the new name/avatar
+                    // 1. Update localStorage with the NEW user data from server
                     localStorage.setItem("user", JSON.stringify(data.user)); 
                     
-                    alert("Profile successfully updated!");
+                    alert("Profile updated successfully!");
                     
-                    // 2. Redirect to profile page to see changes
+                    // 2. Go back to profile page to see changes
                     window.location.href = "profile.html"; 
                 } else {
                     alert(data.error || "Failed to update profile");
                 }
             } catch(e) {
-                console.error("Fetch Error:", e);
-                alert("Error connecting to server. Is the backend running?");
+                console.error("Update Error:", e);
+                alert("Cannot connect to server.");
             }
         });
     }

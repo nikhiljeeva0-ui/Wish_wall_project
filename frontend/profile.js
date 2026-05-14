@@ -1,23 +1,8 @@
 // profile.js
 const API_URL = window.API_URL || "http://localhost:3000";
-
-// 1. AUTH CHECK ON PAGE LOAD
 const token = localStorage.getItem("token");
-if (!token) {
-    window.location.href = "login.html";
-}
 
 document.addEventListener("DOMContentLoaded", async function () {
-    // 2. LOGOUT LOGIC
-    let logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        });
-    }
 
     // 3. TAB SWITCHING LOGIC
     let tabs = document.querySelectorAll(".p-tab");
@@ -94,22 +79,24 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // FUNCTION TO LOAD USER'S OWN POSTS
+    // FUNCTION TO LOAD USER'S OWN POSTS (PROFILE PAGE = ONLY MY POSTS)
     async function loadUserPosts() {
         try {
             let userStr = localStorage.getItem("user");
             if(!userStr) return;
             let currentUser = JSON.parse(userStr);
 
+            // Fetch ALL posts and filter for only OWN posts
             let res = await fetch(API_URL + "/posts");
-            let posts = await res.json();
+            let allPosts = await res.json();
 
-            // Filter to get only posts where author matches current user
-            let myPosts = posts.filter(
-                (post) => post.author && post.author._id === currentUser._id
-            );
+            // REAL logic: Filter posts by author ID
+            let myPosts = allPosts.filter(post => {
+                const authorId = post.author && typeof post.author === 'object' ? post.author._id : post.author;
+                return authorId === currentUser._id;
+            });
 
-            // Update the "Wishes" stat number
+            // Update the "Wishes" (Posts) stat count
             let statNums = document.querySelectorAll(".stat-num");
             if (statNums.length >= 1) {
                 statNums[0].textContent = myPosts.length;
@@ -128,13 +115,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                 return;
             }
 
-            container.innerHTML = ""; // Clear
+            container.innerHTML = ""; // Clear current list
             myPosts.forEach((post) => {
                 container.appendChild(createPostHTML(post));
             });
 
         } catch (err) {
-            console.log("Error loading posts:", err);
+            console.log("Error loading own posts:", err);
         }
     }
 

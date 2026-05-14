@@ -1,80 +1,34 @@
 // notifications.js
 const API_URL = window.API_URL || "http://localhost:3000";
 
-// 1. AUTH CHECK
-const token = localStorage.getItem("token");
-if (!token) {
-    window.location.href = "login.html";
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-    // 2. LOGOUT LOGIC
-    let logoutBtn = document.getElementById("logout-btn");
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        });
-    }
-
-    // 3. DUMMY NOTIFICATIONS DATA
-    // Since the backend does not have a notifications API yet, we will use a simple array.
-    let dummyNotifications = [
-        {
-            id: 1,
-            type: "like",
-            user: "Rahul J.",
-            message: 'liked your wish: "I wish I could travel..."',
-            time: "10m ago",
-            icon: "bi-heart-fill",
-            colorClass: "bg-pink",
-            isRead: false
-        },
-        {
-            id: 2,
-            type: "follow",
-            user: "Anita",
-            message: "started following you.",
-            time: "2h ago",
-            icon: "bi-person-plus-fill",
-            colorClass: "bg-blue",
-            isRead: true
-        },
-        {
-            id: 3,
-            type: "comment",
-            user: "Samir",
-            message: 'replied: "That sounds amazing!"',
-            time: "1d ago",
-            icon: "bi-chat-fill",
-            colorClass: "bg-purple",
-            isRead: true
-        }
-    ];
-
     let listContainer = document.querySelector(".notifications-list");
     let markReadBtn = document.getElementById("mark-read-btn");
     let badge = document.querySelector(".badge.alert");
 
-    // 4. RENDER NOTIFICATIONS
+    // Notifications array (Start empty for MVP as per user request to remove fake data)
+    let notifications = [];
+
+    // 1. RENDER NOTIFICATIONS
     function renderNotifications() {
         if (!listContainer) return;
 
         listContainer.innerHTML = ""; // clear HTML placeholders
 
-        if (dummyNotifications.length === 0) {
-            listContainer.innerHTML = "<p style='padding: 20px; text-align: center; color: gray;'>No notifications yet.</p>";
+        if (notifications.length === 0) {
+            listContainer.innerHTML = `
+                <div style="padding: 40px; text-align: center; color: gray;">
+                    <i class="bi bi-bell-slash" style="font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No notifications yet.</p>
+                    <span style="font-size: 12px;">We'll let you know when someone interacts with your wishes!</span>
+                </div>`;
             if (badge) badge.style.display = "none";
             return;
         }
 
         let unreadCount = 0;
-
-        dummyNotifications.forEach(notif => {
+        notifications.forEach(notif => {
             if (!notif.isRead) unreadCount++;
-
             let unreadClass = notif.isRead ? "" : "unread";
             let dotHtml = notif.isRead ? "" : '<div class="unread-dot"></div>';
 
@@ -89,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 ${dotHtml}
                 <button class="clear-notif-btn" data-id="${notif.id}" style="margin-left: auto; border: none; background: none; color: gray; cursor: pointer; font-size: 18px;">&times;</button>
             `;
-
             listContainer.appendChild(notifEl);
         });
 
@@ -107,19 +60,18 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".clear-notif-btn").forEach(btn => {
             btn.addEventListener("click", function() {
                 let idToRemove = parseInt(this.getAttribute("data-id"));
-                dummyNotifications = dummyNotifications.filter(n => n.id !== idToRemove);
+                notifications = notifications.filter(n => n.id !== idToRemove);
                 renderNotifications();
             });
         });
     }
 
-    // Initialize list
+    // Initialize
     renderNotifications();
 
-    // 5. MARK ALL AS READ LOGIC
     if (markReadBtn) {
         markReadBtn.addEventListener("click", function() {
-            dummyNotifications.forEach(n => n.isRead = true);
+            notifications.forEach(n => n.isRead = true);
             renderNotifications();
         });
     }

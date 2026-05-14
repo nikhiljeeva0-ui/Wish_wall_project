@@ -1,15 +1,8 @@
 // script.js
 const API_URL = window.API_URL || "http://localhost:3000";
-
-// 1. SIMPLE AUTH CHECK ON PAGE LOAD
 const token = localStorage.getItem("token");
-if (!token) {
-    window.location.href = "login.html"; // Redirect if not logged in
-}
 
 document.addEventListener("DOMContentLoaded", function () {
-    // 2. GET HTML ELEMENTS
-    let logoutBtn = document.getElementById("logout-btn");
     let textarea = document.getElementById("wish-textarea");
     let postBtn = document.getElementById("send-wish-btn");
     let mainFeed = document.getElementById("main-content");
@@ -20,37 +13,27 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // MOOD SELECTOR LOGIC
     let moodButtons = document.querySelectorAll(".mood-tag");
-    let selectedColor = "purple";
-    let selectedEmoji = "✨ Dreaming";
-
-    if (moodButtons.length > 0) {
-        moodButtons.forEach(btn => {
-            btn.addEventListener("click", function() {
-                // 1. Remove "active" from all buttons, add to clicked one
-                moodButtons.forEach(b => b.classList.remove("active"));
-                this.classList.add("active");
-                
-                // 2. Save the color and text so we can send it to backend
-                selectedColor = this.getAttribute("data-color");
-                selectedEmoji = this.innerText.trim();
-                
-                console.log("Mood Selected:", selectedEmoji, selectedColor);
-            });
+    let selectedColor = "purple"; // default
+    let selectedEmoji = "✨ Dreaming"; // default
+    
+    // Add click event to each mood button
+    moodButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+            // 1. Remove "active" from all buttons, add to this one
+            moodButtons.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            
+            // 2. Save the values from the clicked button
+            selectedColor = this.getAttribute("data-color") || "purple";
+            selectedEmoji = this.innerText.trim();
+            
+            console.log("Mood Changed to:", selectedEmoji);
         });
-    }
+    });
     
     // 3. LOAD ALL POSTS WHEN PAGE OPENS
     loadPosts();
 
-    // 4. LOGOUT LOGIC
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        });
-    }
 
     // UPDATE CHARACTER COUNT
     if (textarea && countDisplay) {
@@ -64,11 +47,12 @@ document.addEventListener("DOMContentLoaded", function () {
         postBtn.addEventListener("click", async function() {
             let text = textarea.value.trim();
             if (text === "") {
-                alert("Please write something first!");
+                alert("Please write your wish first!");
                 return;
             }
 
             try {
+                // Send post to backend with mood data attached to content
                 let response = await fetch(API_URL + "/posts", {
                     method: "POST",
                     headers: {
@@ -76,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         "Authorization": "Bearer " + token
                     },
                     body: JSON.stringify({ 
+                        // We store color/emoji inside content string separated by |||
                         content: text + "|||" + selectedColor + "|||" + selectedEmoji,
                         isAnonymous: anonToggle ? anonToggle.checked : false
                     })
@@ -84,29 +69,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (response.ok) {
                     textarea.value = ""; // clear text box
                     if(countDisplay) countDisplay.textContent = "0/280";
-                    loadPosts(); // refresh feed
+                    loadPosts(); // refresh feed to show new post
                 } else {
                     alert("Failed to create post.");
                 }
             } catch (error) {
+                console.error("Create Post Error:", error);
                 alert("Cannot connect to server.");
             }
         });
     }
 
-    // 6. FUNCTION TO GET AND DISPLAY ALL POSTS
+    // 6. FUNCTION TO GET AND DISPLAY ALL POSTS (HOME FEED = ALL USERS)
     async function loadPosts() {
         if (!mainFeed) return;
         try {
+            // GET /posts returns ALL posts from ALL users
             let response = await fetch(API_URL + "/posts");
             let posts = await response.json();
             
-            // Clear current posts on screen
             if (postsContainer) {
                 postsContainer.innerHTML = "";
             }
             
-            if (posts.length === 0) {
+            if (!posts || posts.length === 0) {
                 if (postsContainer) {
                     postsContainer.innerHTML = `
                         <div class="empty-state" style="text-align: center; padding: 50px 20px; color: #666;">
@@ -127,24 +113,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // 7. FUNCTION TO BUILD HTML FOR ONE POST
+    // 7. FUNCTION TO BUILD HTML FOR ONE POST (REAL DATA)
     function displayPost(post) {
         let currentUser = JSON.parse(localStorage.getItem("user"));
         
-        // Find if this post belongs to the logged-in user
-        let isMyPost = false;
-        if (currentUser && post.author && post.author._id === currentUser._id) {
-            isMyPost = true;
-        }
-
         // Check if current user liked it
         let hasLiked = false;
-        if (currentUser && post.likes && post.likes.includes(currentUser._id)) {
+        if (currentUser && post.likes && post.likes.some(id => (typeof id === 'string' ? id : id._id) === currentUser._id)) {
             hasLiked = true;
         }
 
-        let likeButtonClass = hasLiked ? "react-btn like-btn active" : "react-btn like-btn";
-        
         let displayContent = post.content || "";
         let badgeColor = "purple";
         let badgeEmoji = "✨ Dreaming";
@@ -158,21 +136,24 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        let displayName = post.author ? post.author.name : "Anonymous";
+        // Use real author data from database (populated)
+        let displayName = post.author ? post.author.name : "Unknown User";
         let avatarSrc = post.author && post.author.avatar ? post.author.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName);
         
+        // Handle anonymous posts
         if (post.isAnonymous) {
             displayName = "Anonymous";
             avatarSrc = "https://api.dicebear.com/7.x/avataaars/svg?seed=Anonymous";
         }
+        
         let dateString = post.createdAt ? new Date(post.createdAt).toLocaleString() : "Just now";
         let likesCount = post.likes ? post.likes.length : 0;
 
-        // Create the actual HTML element
         let postDiv = document.createElement("div");
         postDiv.className = "post box";
-        postDiv.id = "post-" + post._id; // Give it a unique ID
+        postDiv.id = "post-" + post._id;
 
+        // NO DELETE BUTTON HERE (Home feed only shows content)
         postDiv.innerHTML = `
             <div class="post-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -223,25 +204,6 @@ document.addEventListener("DOMContentLoaded", function () {
             postsContainer.appendChild(postDiv);
         }
     }
-    
-    // Make functions global so inline onclick can see them
-    window.deletePost = async function(postId) {
-        if (!confirm("Delete this post?")) return;
-        
-        try {
-            let response = await fetch(API_URL + "/posts/" + postId, {
-                method: "DELETE",
-                headers: { "Authorization": "Bearer " + token }
-            });
-            if (response.ok) {
-                document.getElementById("post-" + postId).remove();
-            } else {
-                alert("Failed to delete.");
-            }
-        } catch (error) {
-            alert("Error deleting.");
-        }
-    };
 
     window.toggleLike = async function(postId, iconElement) {
         let postDiv = document.getElementById("post-" + postId);
