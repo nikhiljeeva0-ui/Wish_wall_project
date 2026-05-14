@@ -1,5 +1,5 @@
 // profile.js
-const API_URL = "http://localhost:3000";
+const API_URL = "https://garuda-wishwall-backend.onrender.com";
 
 // 1. AUTH CHECK ON PAGE LOAD
 const token = localStorage.getItem("token");

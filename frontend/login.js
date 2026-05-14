@@ -21,7 +21,7 @@ var signupEyeBtn = document.querySelector("#signup-eye");
 var confirmEyeBtn = document.querySelector("#confirm-eye");
 var showLoginBtn = document.querySelector("#show-login-btn");
 
-var API_BASE = "http://localhost:3000";
+var API_BASE = "https://garuda-wishwall-backend.onrender.com";
 
 // Check if already logged in
 if (localStorage.getItem("token")) {
