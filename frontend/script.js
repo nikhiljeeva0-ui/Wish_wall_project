@@ -1,14 +1,41 @@
 // script.js
-const API_URL = "http://localhost:3000/posts";
+const API_URL = "http://localhost:3000";
 
-// AUTH CHECK ON PAGE LOAD
-if (!localStorage.getItem("token")) {
-    window.location.href = "login.html";
+// 1. SIMPLE AUTH CHECK ON PAGE LOAD
+const token = localStorage.getItem("token");
+if (!token) {
+    window.location.href = "login.html"; // Redirect if not logged in
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // LOGOUT LOGIC
+    // 2. GET HTML ELEMENTS
     let logoutBtn = document.getElementById("logout-btn");
+    let textarea = document.getElementById("wish-textarea");
+    let postBtn = document.getElementById("send-wish-btn");
+    let mainFeed = document.getElementById("main-content");
+    let nameInput = document.getElementById("name-input");
+    let countDisplay = document.querySelector(".count");
+    
+    // MOOD SELECTOR LOGIC
+    let moodButtons = document.querySelectorAll(".mood-tag");
+    let selectedColor = "purple";
+    let selectedEmoji = "✨ Dreaming";
+
+    if (moodButtons.length > 0) {
+        moodButtons.forEach(btn => {
+            btn.addEventListener("click", function() {
+                moodButtons.forEach(b => b.classList.remove("active"));
+                this.classList.add("active");
+                selectedColor = this.getAttribute("data-color");
+                selectedEmoji = this.innerText;
+            });
+        });
+    }
+    
+    // 3. LOAD ALL POSTS WHEN PAGE OPENS
+    loadPosts();
+
+    // 4. LOGOUT LOGIC
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function(e) {
             e.preventDefault();
@@ -17,317 +44,274 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = "login.html";
         });
     }
-    let textarea = document.getElementById("wish-textarea");
-    let countDisplay = document.querySelector(".count");
-    let anonToggle = document.getElementById("anon-toggle");
-    let nameInput = document.getElementById("name-input");
-    let postBtn = document.getElementById("send-wish-btn");
-    let mainFeed = document.getElementById("main-content");
-    let searchInput = document.getElementById("home-search");
-    
-    let moodButtons = document.querySelectorAll(".mood-tag");
-    let currentMood = "Dreaming";
-    let currentMoodColor = "purple";
 
-    if (textarea) textarea.addEventListener("input", updateCount);
-    if (anonToggle) anonToggle.addEventListener("change", handleAnon);
-    if (postBtn) postBtn.addEventListener("click", submitWish);
-    if (searchInput) searchInput.addEventListener("input", searchFeed);
-
-    let mobileBtn = document.getElementById("mobile-post-btn");
-    if (mobileBtn && textarea) {
-        mobileBtn.addEventListener("click", function() {
-            textarea.closest('.composer').style.display = 'flex'; 
-            textarea.focus();
+    // UPDATE CHARACTER COUNT
+    if (textarea && countDisplay) {
+        textarea.addEventListener("input", function() {
+            countDisplay.textContent = textarea.value.length + "/280";
         });
     }
 
-    moodButtons.forEach(function(btn) {
-        btn.addEventListener("click", function() {
-            moodButtons.forEach(b => b.classList.remove("active"));
-            this.classList.add("active");
-            currentMood = this.getAttribute("data-mood");
-            currentMoodColor = this.getAttribute("data-color");
+    // 5. CREATE NEW POST (WISH)
+    if (postBtn) {
+        postBtn.addEventListener("click", async function() {
+            let text = textarea.value.trim();
+            if (text === "") {
+                alert("Please write something first!");
+                return;
+            }
+
+            try {
+                let response = await fetch(API_URL + "/posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify({ 
+                        content: text + "|||" + selectedColor + "|||" + selectedEmoji 
+                    })
+                });
+
+                if (response.ok) {
+                    textarea.value = ""; // clear text box
+                    if(countDisplay) countDisplay.textContent = "0/280";
+                    loadPosts(); // refresh feed
+                } else {
+                    alert("Failed to create post.");
+                }
+            } catch (error) {
+                alert("Cannot connect to server.");
+            }
         });
-    });
-
-    function updateCount() {
-        countDisplay.textContent = textarea.value.length + "/280";
     }
 
-    function handleAnon() {
-        if (anonToggle.checked) {
-            nameInput.value = "";
-            nameInput.disabled = true;
-            nameInput.placeholder = "Anon";
-            nameInput.style.opacity = "0.6";
-        } else {
-            nameInput.disabled = false;
-            nameInput.placeholder = "Name (optional)";
-            nameInput.style.opacity = "1";
-        }
-    }
-
-    // 1. GET ALL WISHES FROM BACKEND
-    async function loadWishes() {
+    // 6. FUNCTION TO GET AND DISPLAY ALL POSTS
+    async function loadPosts() {
+        if (!mainFeed) return;
         try {
-            let response = await fetch(API_URL);
-            let wishes = await response.json();
+            let response = await fetch(API_URL + "/posts");
+            let posts = await response.json();
             
-            // Clear existing posts except composer
-            let posts = mainFeed.querySelectorAll('.post');
-            posts.forEach(post => post.remove());
+            // Clear current posts on screen (except the composer box)
+            let existingPosts = mainFeed.querySelectorAll(".post");
+            existingPosts.forEach(post => post.remove());
             
-            // Display all wishes from database
-            wishes.forEach(wish => {
-                displayWish(wish);
+            // Loop through each post and create HTML for it
+            posts.forEach(post => {
+                displayPost(post);
             });
         } catch (error) {
-            console.error("Error loading wishes:", error);
+            console.log("Error loading posts:", error);
         }
     }
 
-    // 2. CREATE A WISH VIA BACKEND
-    async function submitWish() {
-        let text = textarea.value.trim();
+    // 7. FUNCTION TO BUILD HTML FOR ONE POST
+    function displayPost(post) {
+        let currentUser = JSON.parse(localStorage.getItem("user"));
         
-        if (text === "") {
-            alert("Write a wish first.");
-            return;
+        // Find if this post belongs to the logged-in user
+        let isMyPost = false;
+        if (currentUser && post.author && post.author._id === currentUser._id) {
+            isMyPost = true;
         }
 
-        let token = localStorage.getItem("token");
-        if (!token) {
-            alert("Please login first to post a wish.");
-            window.location.href = "loginpage.html";
-            return;
+        // Check if current user liked it
+        let hasLiked = false;
+        if (currentUser && post.likes && post.likes.includes(currentUser._id)) {
+            hasLiked = true;
         }
 
-        // Prepare data for backend (GitHub backend uses 'content')
-        let newWishData = {
-            content: text
-        };
+        let likeButtonClass = hasLiked ? "react-btn like-btn active" : "react-btn like-btn";
+        
+        // Home feed should not have delete buttons per user request
+        let deleteBtnHTML = "";
 
-        try {
-            let response = await fetch(API_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(newWishData)
-            });
+        let displayContent = post.content || "";
+        let badgeColor = "purple";
+        let badgeEmoji = "✨ Dreaming";
 
-            if (response.ok) {
-                let data = await response.json();
-                
-                // Add to UI
-                displayWish(data.post, true);
-
-                // Reset form
-                textarea.value = "";
-                if (!anonToggle.checked) nameInput.value = "";
-                updateCount();
-                moodButtons[0].click();
-            } else {
-                let errData = await response.json();
-                alert(errData.error || "Failed to create wish.");
+        if (displayContent.includes("|||")) {
+            let parts = displayContent.split("|||");
+            displayContent = parts[0];
+            if (parts.length >= 3) {
+                badgeColor = parts[1];
+                badgeEmoji = parts[2];
             }
-        } catch (error) {
-            console.error("Error creating wish:", error);
-            alert("Error connecting to server.");
-        }
-    }
-
-    async function deleteWish(wishId, postElement) {
-        if (!confirm("Are you sure you want to delete this wish?")) return;
-        let token = localStorage.getItem("token");
-        try {
-            let response = await fetch(`${API_URL}/${wishId}`, {
-                method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                postElement.remove();
-            } else {
-                alert("Failed to delete wish.");
-            }
-        } catch (error) {
-            console.error("Error deleting wish:", error);
-        }
-    }
-
-    // HELPER FUNCTION TO DISPLAY A WISH IN THE UI
-    function displayWish(wish, prepend = false) {
-        // GitHub backend uses author object for name
-        let displayName = "Anonymous";
-        if (wish.author && wish.author.name) {
-            displayName = wish.author.name;
-        } else if (wish.authorId) {
-            displayName = wish.authorId; // Fallback for localStore
-        }
-        
-        let text = wish.content || "";
-        let likesCount = wish.likes ? wish.likes.length : 0;
-        
-        // Use a default avatar
-        let avatar = '<div class="avatar-sm anon-pic">?</div>';
-        if (displayName !== "Anonymous") {
-            avatar = '<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName) + '" class="avatar-sm" alt="User">';
         }
 
-        let newPost = document.createElement("div");
-        newPost.className = "post box";
-        if (displayName === "Anonymous") newPost.classList.add("anon-post");
+        let displayName = post.author ? post.author.name : "Anonymous";
+        let dateString = post.createdAt ? new Date(post.createdAt).toLocaleString() : "Just now";
+        let likesCount = post.likes ? post.likes.length : 0;
 
-        // We will assign a random mood if backend doesn't store it
-        const emojis = ["✨ Dreaming", "🔥 Hustle", "💖 Love", "🌍 Travel", "🚀 Startup", "🎯 Goals"];
-        const colors = ["purple", "orange", "pink", "blue", "yellow", "green"];
-        
-        // Randomly pick one or just default to Dreaming if none stored
-        let randomIdx = Math.floor(Math.random() * emojis.length);
-        let emojiMood = emojis[randomIdx];
-        let color = colors[randomIdx];
+        // Create the actual HTML element
+        let postDiv = document.createElement("div");
+        postDiv.className = "post box";
+        postDiv.id = "post-" + post._id; // Give it a unique ID
 
-        // Format Date
-        let dateString = wish.createdAt ? new Date(wish.createdAt).toLocaleString() : "Just now";
-
-        let currentUser = JSON.parse(localStorage.getItem("user")) || {};
-        let isAuthor = (wish.author && wish.author._id === currentUser._id) || (wish.authorId === currentUser._id);
-
-        let deleteHtml = isAuthor ? `<button class="action-btn delete-btn" style="color: #ef4444;"><i class="bi bi-trash"></i> Delete</button>` : '';
-
-        newPost.innerHTML = `
+        postDiv.innerHTML = `
             <div class="post-top">
-                ${avatar}
+                <img src="${post.author && post.author.avatar ? post.author.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName)}" class="avatar-sm">
                 <div class="post-meta">
                     <span class="author">${displayName}</span>
                     <span class="time">${dateString}</span>
                 </div>
-                <span class="mood-badge badge-${color}">${emojiMood}</span>
+                <span class="mood-badge badge-${badgeColor}">${badgeEmoji}</span>
             </div>
-            <div class="post-body">${text}</div>
+            
+            <div class="post-body">
+                ${displayContent}
+            </div>
+            
             <div class="post-bottom">
                 <div class="reactions">
-                    <button class="react-btn like-btn" data-id="${wish._id}">👍 <span>${likesCount}</span></button>
-                    <button class="react-btn">❤️ <span>0</span></button>
+                    <button class="${likeButtonClass}" onclick="toggleLike('${post._id}', this)">
+                        👍 <span>${likesCount}</span>
+                    </button>
+                    <button class="action-btn" onclick="toggleComments('${post._id}')">💬 Comments</button>
                 </div>
                 <div class="actions">
-                    ${deleteHtml}
-                    <button class="action-btn"><i class="bi bi-bookmark"></i> Save</button>
+                    ${deleteBtnHTML}
+                    <button class="action-btn" onclick="toggleBookmark('${post._id}', this)">🔖 Save</button>
+                </div>
+            </div>
+            
+            <div class="comments-section" id="comments-${post._id}" style="display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                <div class="comments-list" id="comments-list-${post._id}"></div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="comment-input-${post._id}" placeholder="Write a comment..." style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                    <button onclick="addComment('${post._id}')" style="padding: 5px 10px; border-radius: 5px; background: #6366f1; color: white; border: none; cursor: pointer;">Post</button>
                 </div>
             </div>
         `;
-
-        if (isAuthor) {
-            let deleteBtn = newPost.querySelector(".delete-btn");
-            if (deleteBtn) {
-                deleteBtn.addEventListener("click", function() {
-                    deleteWish(wish._id, newPost);
-                });
-            }
-        }
-
-        let composerBox = document.querySelector(".composer");
         
-        // If prepending (new post), put it right after composer
-        // If appending (loading all), put it at the end of feed
-        if (prepend && composerBox && composerBox.nextSibling) {
-            mainFeed.insertBefore(newPost, composerBox.nextSibling);
+        mainFeed.appendChild(postDiv);
+    }
+    
+    // Make functions global so inline onclick can see them
+    window.deletePost = async function(postId) {
+        if (!confirm("Delete this post?")) return;
+        
+        try {
+            let response = await fetch(API_URL + "/posts/" + postId, {
+                method: "DELETE",
+                headers: { "Authorization": "Bearer " + token }
+            });
+            if (response.ok) {
+                document.getElementById("post-" + postId).remove();
+            } else {
+                alert("Failed to delete.");
+            }
+        } catch (error) {
+            alert("Error deleting.");
+        }
+    };
+
+    window.toggleLike = async function(postId, buttonElement) {
+        let span = buttonElement.querySelector("span");
+        let currentLikes = parseInt(span.innerText);
+        let isLiked = buttonElement.classList.contains("active");
+
+        // Optimistic UI update (change visually immediately)
+        if (isLiked) {
+            buttonElement.classList.remove("active");
+            span.innerText = currentLikes - 1;
         } else {
-            mainFeed.appendChild(newPost);
+            buttonElement.classList.add("active");
+            span.innerText = currentLikes + 1;
         }
 
-        setupReactions(newPost);
-        setupActions(newPost);
-    }
+        // Tell backend
+        let endpoint = isLiked ? "/posts/unlike/" : "/posts/like/";
+        try {
+            await fetch(API_URL + endpoint + postId, {
+                method: "PUT",
+                headers: { "Authorization": "Bearer " + token }
+            });
+        } catch (err) {
+            console.log("Error toggling like");
+        }
+    };
 
-    function setupReactions(postElement = document) {
-        postElement.querySelectorAll(".react-btn").forEach(function(btn) {
-            if (!btn.dataset.ready) {
-                btn.dataset.ready = "true";
-                btn.addEventListener("click", async function() {
-                    let span = this.querySelector("span");
-                    let val = parseInt(span.textContent);
-                    
-                    // If it's the like button, call the backend
-                    if (this.classList.contains("like-btn")) {
-                        let token = localStorage.getItem("token");
-                        if (!token) {
-                            alert("Please login first to like a wish.");
-                            return;
-                        }
-                        
-                        let wishId = this.getAttribute("data-id");
-                        try {
-                            let response = await fetch(`${API_URL}/like/${wishId}`, {
-                                method: "PUT",
-                                headers: {
-                                    "Authorization": `Bearer ${token}`
-                                }
-                            });
-                            
-                            if (response.ok) {
-                                this.classList.add("active");
-                                span.textContent = val + 1;
-                            } else {
-                                let errData = await response.json();
-                                if (errData.error === "Post already liked") {
-                                    // Visual feedback only
-                                    this.classList.add("active");
-                                } else {
-                                    alert(errData.error || "Failed to like post");
-                                }
-                            }
-                        } catch (error) {
-                            console.error("Error liking post:", error);
-                        }
-                    } else {
-                        // Dummy behavior for heart icon
-                        if (this.classList.contains("active")) {
-                            this.classList.remove("active");
-                            span.textContent = val - 1;
-                        } else {
-                            this.classList.add("active");
-                            span.textContent = val + 1;
-                        }
-                    }
-                });
+    window.toggleBookmark = async function(postId, buttonElement) {
+        try {
+            let response = await fetch(API_URL + "/users/bookmark/" + postId, {
+                method: "PUT",
+                headers: { "Authorization": "Bearer " + token }
+            });
+            if (response.ok) {
+                if (buttonElement.innerText === "🔖 Save") {
+                    buttonElement.innerText = "🔖 Saved!";
+                    buttonElement.style.color = "orange";
+                } else {
+                    buttonElement.innerText = "🔖 Save";
+                    buttonElement.style.color = "";
+                }
             }
-        });
-    }
-
-    function setupActions(postElement = document) {
-        postElement.querySelectorAll(".bi-bookmark").forEach(icon => {
-            let btn = icon.parentElement;
-            if (!btn.dataset.ready) {
-                btn.dataset.ready = "true";
-                btn.addEventListener("click", function() {
-                    if (icon.classList.contains("bi-bookmark")) {
-                        icon.className = "bi bi-bookmark-fill text-pink";
-                        icon.style.color = "#ec4899";
-                    } else {
-                        icon.className = "bi bi-bookmark";
-                        icon.style.color = "";
-                    }
-                });
-            }
-        });
-    }
-
-    function searchFeed() {
-        let term = searchInput.value.toLowerCase().trim();
-        document.querySelectorAll(".post").forEach(post => {
-            let txt = post.innerText.toLowerCase();
-            post.style.display = txt.includes(term) ? "flex" : "none";
-        });
-    }
-
-    // Init
-    if (textarea) updateCount();
-    if (anonToggle) handleAnon();
+        } catch (err) {
+            console.log("Error bookmarking");
+        }
+    };
     
-    // Load wishes from DB when page loads
-    loadWishes();
+    window.toggleComments = async function(postId) {
+        let commentSection = document.getElementById("comments-" + postId);
+        let list = document.getElementById("comments-list-" + postId);
+        
+        if (commentSection.style.display === "none") {
+            commentSection.style.display = "block";
+            // Fetch comments
+            try {
+                let res = await fetch(API_URL + "/posts/comment/" + postId);
+                let comments = await res.json();
+                list.innerHTML = "";
+                comments.forEach(c => {
+                    let authorName = c.author ? c.author.name : "Anonymous";
+                    list.innerHTML += `<div style="margin-bottom: 5px; font-size: 14px;"><strong>${authorName}:</strong> ${c.content}</div>`;
+                });
+                if(comments.length === 0) list.innerHTML = "<div style='font-size: 12px; color: gray;'>No comments yet.</div>";
+            } catch (err) {
+                console.log(err);
+            }
+        } else {
+            commentSection.style.display = "none";
+        }
+    };
+
+    window.addComment = async function(postId) {
+        let input = document.getElementById("comment-input-" + postId);
+        let text = input.value.trim();
+        if (text === "") return;
+        
+        try {
+            let res = await fetch(API_URL + "/posts/comment/" + postId, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token 
+                },
+                body: JSON.stringify({ content: text })
+            });
+            
+            if(res.ok) {
+                input.value = "";
+                // Briefly hide and show to reload
+                document.getElementById("comments-" + postId).style.display = "none";
+                window.toggleComments(postId);
+            }
+        } catch(err) {
+            console.log(err);
+        }
+    };
+
+    // SEARCH LOGIC
+    let searchInput = document.getElementById("home-search");
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            let term = this.value.toLowerCase().trim();
+            document.querySelectorAll(".post").forEach(post => {
+                let txt = post.innerText.toLowerCase();
+                post.style.display = txt.includes(term) ? "flex" : "none";
+            });
+        });
+    }
 });

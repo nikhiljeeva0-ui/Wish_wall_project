@@ -20,11 +20,11 @@ router.put("/me", authMiddleware, updateMe);
 
 router.get("/", getAllUsers);
 
-router.put("/follow/:id", authMiddleware, followUser);
+router.post("/follow/:id", authMiddleware, followUser);
 
-router.put("/unfollow/:id", authMiddleware, unfollowUser);
+router.post("/unfollow/:id", authMiddleware, unfollowUser);
 
-router.put("/bookmark/:id", authMiddleware, bookmarkPost);
+router.post("/bookmark/:id", authMiddleware, bookmarkPost);
 
 router.get("/bookmarks", authMiddleware, getBookmarks);
 

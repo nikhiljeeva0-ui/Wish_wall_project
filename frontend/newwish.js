@@ -1,10 +1,14 @@
-// AUTH CHECK ON PAGE LOAD
-if (!localStorage.getItem("token")) {
+// newwish.js
+const API_URL = "http://localhost:3000";
+
+// 1. AUTH CHECK
+const token = localStorage.getItem("token");
+if (!token) {
     window.location.href = "login.html";
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // LOGOUT LOGIC
+    // 2. LOGOUT LOGIC
     let logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function(e) {
@@ -14,10 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = "login.html";
         });
     }
-});
 
-// newwish.js
-document.addEventListener("DOMContentLoaded", function () {
     let textarea = document.getElementById("nw-text");
     let countDisplay = document.getElementById("nw-count");
     let anonToggle = document.getElementById("nw-anon");
@@ -26,12 +27,14 @@ document.addEventListener("DOMContentLoaded", function () {
     let draftBtn = document.getElementById("nw-draft");
     let moodButtons = document.querySelectorAll(".mood-tag");
 
+    // 3. TEXTAREA CHARACTER COUNT
     if (textarea) {
         textarea.addEventListener("input", function() {
             countDisplay.textContent = textarea.value.length + "/500";
         });
     }
 
+    // 4. ANONYMOUS TOGGLE LOGIC
     if (anonToggle) {
         anonToggle.addEventListener("change", function() {
             if (anonToggle.checked) {
@@ -47,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // 5. MOOD BUTTONS LOGIC
     moodButtons.forEach(function(btn) {
         btn.addEventListener("click", function() {
             moodButtons.forEach(b => b.classList.remove("active"));
@@ -54,6 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // 6. CREATE NEW WISH LOGIC
     if (postBtn) {
         postBtn.addEventListener("click", async function() {
             let text = textarea.value.trim();
@@ -62,26 +67,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             } 
             
-            let token = localStorage.getItem("token");
-            if (!token) {
-                alert("Please login first.");
-                window.location.href = "login.html";
-                return;
-            }
+            let activeMood = document.querySelector(".mood-tag.active");
+            let selColor = activeMood ? activeMood.getAttribute("data-color") : "purple";
+            let selEmoji = activeMood ? activeMood.innerText : "✨ Dreaming";
             
             try {
-                let response = await fetch("https://wish-wall-d30y.onrender.com", {
+                let response = await fetch(API_URL + "/posts", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`
                     },
-                    body: JSON.stringify({ content: text })
+                    body: JSON.stringify({ content: text + "|||" + selColor + "|||" + selEmoji })
                 });
 
                 if (response.ok) {
                     alert("Wish published!");
-                    window.location.href = "index.html";
+                    window.location.href = "index.html"; // Go back to feed
                 } else {
                     let errData = await response.json();
                     alert(errData.error || "Failed to publish wish.");
@@ -92,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // 7. DRAFT BUTTON (DUMMY)
     if (draftBtn) {
         draftBtn.addEventListener("click", function() {
             alert("Draft saved! (Dummy action)");

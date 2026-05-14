@@ -21,7 +21,7 @@ var signupEyeBtn = document.querySelector("#signup-eye");
 var confirmEyeBtn = document.querySelector("#confirm-eye");
 var showLoginBtn = document.querySelector("#show-login-btn");
 
-var API_BASE = "https://wish-wall-d30y.onrender.com";
+var API_BASE = "http://localhost:3000";
 
 // Check if already logged in
 if (localStorage.getItem("token")) {

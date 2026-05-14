@@ -3,35 +3,12 @@ const Post = require("../models/post.model");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
-const {
-  sanitizeUser,
-  findUserById,
-  findUserByEmail,
-  updateUser,
-  listUsers: listLocalUsers,
-  followLocalUser,
-  unfollowLocalUser,
-  bookmarkLocalPost,
-  listLocalBookmarks,
-} = require("../utils/localStore");
-
-const isMongoReady = () => mongoose.connection.readyState === 1;
-
 const getMe = async (req, res) => {
 	try {
-		if (!isMongoReady()) {
-			const user = findUserById(req.user.userId);
-
-			if (!user) {
-				return res.status(404).json({
-					error: "User not found",
-				});
-			}
-
-			return res.status(200).json({ user: sanitizeUser(user) });
-		}
-
-		const user = await User.findById(req.user.userId).select("name email createdAt updatedAt");
+		const user = await User.findById(req.user.userId)
+			.select("-password")
+			.populate("followers", "name email")
+			.populate("following", "name email");
 
 		if (!user) {
 			return res.status(404).json({
@@ -49,40 +26,8 @@ const getMe = async (req, res) => {
 
 const updateMe = async (req, res) => {
 	try {
-		const { name, email, password } = req.body;
-
-		if (!isMongoReady()) {
-			const existingUser = findUserById(req.user.userId);
-
-			if (!existingUser) {
-				return res.status(404).json({
-					error: "User not found",
-				});
-			}
-
-			if (email) {
-				const duplicateUser = findUserByEmail(email);
-
-				if (duplicateUser && duplicateUser._id !== existingUser._id) {
-					return res.status(400).json({
-						error: "Email already exists",
-					});
-				}
-			}
-
-			const updates = {
-				name: name ? name.trim() : undefined,
-				email: email ? email.trim() : undefined,
-				password: password ? await bcrypt.hash(password, 10) : undefined,
-			};
-
-			const user = updateUser(req.user.userId, updates);
-
-			return res.status(200).json({
-				message: "Profile updated",
-				user: sanitizeUser(user),
-			});
-		}
+		const { name, email, password, bio, avatar } = req.body;
+		console.log("BACKEND: Updating user profile...", { userId: req.user.userId, name, bio });
 
 		const user = await User.findById(req.user.userId);
 
@@ -92,27 +37,22 @@ const updateMe = async (req, res) => {
 			});
 		}
 
-		if (name) {
-			user.name = name.trim();
-		}
-
+		if (name) user.name = name.trim();
 		if (email) {
 			const existingUser = await User.findOne({ email, _id: { $ne: user._id } });
-
 			if (existingUser) {
-				return res.status(400).json({
-					error: "Email already exists",
-				});
+				return res.status(400).json({ error: "Email already exists" });
 			}
-
 			user.email = email.trim();
 		}
-
 		if (password) {
 			user.password = await bcrypt.hash(password, 10);
 		}
+		if (bio !== undefined) user.bio = bio.trim();
+		if (avatar) user.avatar = avatar;
 
 		await user.save();
+		console.log("BACKEND: User updated successfully!");
 
 		res.status(200).json({
 			message: "Profile updated",
@@ -120,9 +60,14 @@ const updateMe = async (req, res) => {
 				_id: user._id,
 				name: user.name,
 				email: user.email,
+				bio: user.bio,
+				avatar: user.avatar,
+				followers: user.followers,
+				following: user.following
 			},
 		});
 	} catch (err) {
+		console.error("BACKEND: Update Error:", err.message);
 		res.status(500).json({
 			error: err.message,
 		});
@@ -131,11 +76,6 @@ const updateMe = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    if (!isMongoReady()) {
-      const users = listLocalUsers().map(sanitizeUser);
-      return res.status(200).json(users);
-    }
-
     const users = await User.find().select("-password");
     res.status(200).json(users);
   } catch (err) {
@@ -148,14 +88,6 @@ const followUser = async (req, res) => {
     const userToFollowId = req.params.id;
     if (userToFollowId === req.user.userId) {
       return res.status(400).json({ error: "Cannot follow yourself" });
-    }
-
-    if (!isMongoReady()) {
-      const updatedUser = followLocalUser(req.user.userId, userToFollowId);
-      if (!updatedUser) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      return res.status(200).json({ message: "User followed", user: updatedUser });
     }
 
     const user = await User.findById(req.user.userId);
@@ -181,18 +113,7 @@ const followUser = async (req, res) => {
 const unfollowUser = async (req, res) => {
   try {
     const userToUnfollowId = req.params.id;
-    if (userToUnfollowId === req.user.userId) {
-      return res.status(400).json({ error: "Cannot unfollow yourself" });
-    }
-
-    if (!isMongoReady()) {
-      const updatedUser = unfollowLocalUser(req.user.userId, userToUnfollowId);
-      if (!updatedUser) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      return res.status(200).json({ message: "User unfollowed", user: updatedUser });
-    }
-
+    
     const user = await User.findById(req.user.userId);
     const userToUnfollow = await User.findById(userToUnfollowId);
 
@@ -216,14 +137,6 @@ const bookmarkPost = async (req, res) => {
   try {
     const postId = req.params.id;
 
-    if (!isMongoReady()) {
-      const updatedUser = bookmarkLocalPost(req.user.userId, postId);
-      if (!updatedUser) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      return res.status(200).json({ message: "Bookmark updated", user: updatedUser });
-    }
-
     const user = await User.findById(req.user.userId);
     const post = await Post.findById(postId);
 
@@ -238,7 +151,6 @@ const bookmarkPost = async (req, res) => {
     }
 
     await user.save();
-
     res.status(200).json({ message: "Bookmark updated", user });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -247,11 +159,6 @@ const bookmarkPost = async (req, res) => {
 
 const getBookmarks = async (req, res) => {
   try {
-    if (!isMongoReady()) {
-      const bookmarks = listLocalBookmarks(req.user.userId);
-      return res.status(200).json(bookmarks);
-    }
-
     const user = await User.findById(req.user.userId).populate({
       path: "bookmarks",
       populate: { path: "author", select: "name email" }
