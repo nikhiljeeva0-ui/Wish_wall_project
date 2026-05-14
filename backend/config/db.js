@@ -7,11 +7,11 @@ const connectDB = async () => {
       return;
     }
 
+    console.log("Attempting to connect to MongoDB...");
     await mongoose.connect(process.env.MONGODB_URI);
-
-    console.log("MongoDB Connected");
+    console.log("✅ MongoDB Connected Successfully");
   } catch (err) {
-    console.log(err.message);
+    console.error("❌ MongoDB Connection Error:", err.message);
   }
 };
 

@@ -16,7 +16,14 @@ connectDB();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["https://wish-wall-project-zuac.vercel.app", "http://localhost:5500", "http://127.0.0.1:5500"],
+    origin: [
+        "https://wish-wall-project-zuac.vercel.app", 
+        "https://wish-wall-project.vercel.app", 
+        "http://localhost:5500", 
+        "http://127.0.0.1:5500", 
+        "http://localhost:5501", 
+        "http://127.0.0.1:5501"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));

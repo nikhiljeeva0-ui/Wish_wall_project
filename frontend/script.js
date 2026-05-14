@@ -1,5 +1,5 @@
 // script.js
-const API_URL = "https://wish-wall-project-1.onrender.com";
+const API_URL = window.API_URL || "http://localhost:3000";
 
 // 1. SIMPLE AUTH CHECK ON PAGE LOAD
 const token = localStorage.getItem("token");
@@ -13,7 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let textarea = document.getElementById("wish-textarea");
     let postBtn = document.getElementById("send-wish-btn");
     let mainFeed = document.getElementById("main-content");
+    let postsContainer = document.getElementById("posts-container");
     let nameInput = document.getElementById("name-input");
+    let anonToggle = document.getElementById("anon-toggle");
     let countDisplay = document.querySelector(".count");
     
     // MOOD SELECTOR LOGIC
@@ -74,7 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         "Authorization": "Bearer " + token
                     },
                     body: JSON.stringify({ 
-                        content: text + "|||" + selectedColor + "|||" + selectedEmoji 
+                        content: text + "|||" + selectedColor + "|||" + selectedEmoji,
+                        isAnonymous: anonToggle ? anonToggle.checked : false
                     })
                 });
 
@@ -98,10 +101,23 @@ document.addEventListener("DOMContentLoaded", function () {
             let response = await fetch(API_URL + "/posts");
             let posts = await response.json();
             
-            // Clear current posts on screen (except the composer box)
-            let existingPosts = mainFeed.querySelectorAll(".post");
-            existingPosts.forEach(post => post.remove());
+            // Clear current posts on screen
+            if (postsContainer) {
+                postsContainer.innerHTML = "";
+            }
             
+            if (posts.length === 0) {
+                if (postsContainer) {
+                    postsContainer.innerHTML = `
+                        <div class="empty-state" style="text-align: center; padding: 50px 20px; color: #666;">
+                            <i class="bi bi-mailbox" style="font-size: 3rem; color: #ccc;"></i>
+                            <p style="margin-top: 15px;">No wishes yet. Be the first to make one!</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
             // Loop through each post and create HTML for it
             posts.forEach(post => {
                 displayPost(post);
@@ -129,9 +145,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let likeButtonClass = hasLiked ? "react-btn like-btn active" : "react-btn like-btn";
         
-        // Home feed should not have delete buttons per user request
-        let deleteBtnHTML = "";
-
         let displayContent = post.content || "";
         let badgeColor = "purple";
         let badgeEmoji = "✨ Dreaming";
@@ -146,6 +159,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         let displayName = post.author ? post.author.name : "Anonymous";
+        let avatarSrc = post.author && post.author.avatar ? post.author.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName);
+        
+        if (post.isAnonymous) {
+            displayName = "Anonymous";
+            avatarSrc = "https://api.dicebear.com/7.x/avataaars/svg?seed=Anonymous";
+        }
         let dateString = post.createdAt ? new Date(post.createdAt).toLocaleString() : "Just now";
         let likesCount = post.likes ? post.likes.length : 0;
 
@@ -155,41 +174,54 @@ document.addEventListener("DOMContentLoaded", function () {
         postDiv.id = "post-" + post._id; // Give it a unique ID
 
         postDiv.innerHTML = `
-            <div class="post-top">
-                <img src="${post.author && post.author.avatar ? post.author.avatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(displayName)}" class="avatar-sm">
-                <div class="post-meta">
-                    <span class="author">${displayName}</span>
-                    <span class="time">${dateString}</span>
+            <div class="post-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${avatarSrc}" class="avatar-sm" style="width: 32px; height: 32px;">
+                    <span class="author" style="font-weight: 600; font-size: 14px;">${displayName}</span>
                 </div>
                 <span class="mood-badge badge-${badgeColor}">${badgeEmoji}</span>
             </div>
             
-            <div class="post-body">
+            <div class="post-body" style="padding: 0 15px 12px; font-size: 15px; line-height: 1.5;">
                 ${displayContent}
             </div>
             
-            <div class="post-bottom">
-                <div class="reactions">
-                    <button class="${likeButtonClass}" onclick="toggleLike('${post._id}', this)">
-                        👍 <span>${likesCount}</span>
-                    </button>
-                    <button class="action-btn" onclick="toggleComments('${post._id}')">💬 Comments</button>
+            <div class="post-footer" style="padding: 0 15px 15px;">
+                <div class="footer-actions" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 22px;">
+                    <div style="display: flex; gap: 15px;">
+                        <i class="bi ${hasLiked ? 'bi-heart-fill' : 'bi-heart'}" 
+                           style="cursor: pointer; color: ${hasLiked ? '#ed4956' : 'inherit'};" 
+                           onclick="toggleLike('${post._id}', this)"></i>
+                        <i class="bi bi-chat" style="cursor: pointer;" onclick="toggleComments('${post._id}')"></i>
+                        <i class="bi bi-send" style="cursor: pointer;"></i>
+                    </div>
+                    <i class="bi bi-bookmark" style="cursor: pointer;" onclick="toggleBookmark('${post._id}', this)"></i>
                 </div>
-                <div class="actions">
-                    <button class="action-btn" onclick="toggleBookmark('${post._id}', this)">🔖 Save</button>
+                <div class="likes-info" style="font-weight: 600; font-size: 14px; margin-bottom: 5px;">
+                    <span class="likes-count">${likesCount}</span> likes
+                </div>
+                <div class="caption" style="font-size: 14px; margin-bottom: 5px;">
+                    <strong>${displayName}</strong> ${displayContent}
+                </div>
+                <div class="time" style="font-size: 10px; color: #8e8e8e; text-transform: uppercase;">
+                    ${dateString}
                 </div>
             </div>
-            
-            <div class="comments-section" id="comments-${post._id}" style="display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-                <div class="comments-list" id="comments-list-${post._id}"></div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="comment-input-${post._id}" placeholder="Write a comment..." style="flex: 1; padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
-                    <button onclick="addComment('${post._id}')" style="padding: 5px 10px; border-radius: 5px; background: #6366f1; color: white; border: none; cursor: pointer;">Post</button>
+
+            <div class="comments-section" id="comments-${post._id}" style="display: none; padding: 10px 15px; border-top: 1px solid #efefef;">
+                <div class="comments-list" id="comments-list-${post._id}" style="margin-bottom: 10px;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="comment-input-${post._id}" placeholder="Add a comment..." 
+                           style="flex: 1; border: none; outline: none; font-size: 14px;">
+                    <button onclick="addComment('${post._id}')" 
+                            style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; font-size: 14px;">Post</button>
                 </div>
             </div>
         `;
         
-        mainFeed.appendChild(postDiv);
+        if (postsContainer) {
+            postsContainer.appendChild(postDiv);
+        }
     }
     
     // Make functions global so inline onclick can see them
@@ -211,18 +243,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    window.toggleLike = async function(postId, buttonElement) {
-        let span = buttonElement.querySelector("span");
-        let currentLikes = parseInt(span.innerText);
-        let isLiked = buttonElement.classList.contains("active");
+    window.toggleLike = async function(postId, iconElement) {
+        let postDiv = document.getElementById("post-" + postId);
+        let likesSpan = postDiv.querySelector(".likes-count");
+        let currentLikes = parseInt(likesSpan.innerText);
+        let isLiked = iconElement.classList.contains("bi-heart-fill");
 
         // Optimistic UI update (change visually immediately)
         if (isLiked) {
-            buttonElement.classList.remove("active");
-            span.innerText = currentLikes - 1;
+            iconElement.classList.remove("bi-heart-fill");
+            iconElement.classList.add("bi-heart");
+            iconElement.style.color = "inherit";
+            likesSpan.innerText = currentLikes - 1;
         } else {
-            buttonElement.classList.add("active");
-            span.innerText = currentLikes + 1;
+            iconElement.classList.add("bi-heart-fill");
+            iconElement.classList.remove("bi-heart");
+            iconElement.style.color = "#ed4956";
+            likesSpan.innerText = currentLikes + 1;
         }
 
         // Tell backend
@@ -237,19 +274,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    window.toggleBookmark = async function(postId, buttonElement) {
+    window.toggleBookmark = async function(postId, iconElement) {
         try {
             let response = await fetch(API_URL + "/users/bookmark/" + postId, {
-                method: "PUT",
+                method: "POST",
                 headers: { "Authorization": "Bearer " + token }
             });
             if (response.ok) {
-                if (buttonElement.innerText === "🔖 Save") {
-                    buttonElement.innerText = "🔖 Saved!";
-                    buttonElement.style.color = "orange";
+                if (iconElement.classList.contains("bi-bookmark-fill")) {
+                    iconElement.classList.remove("bi-bookmark-fill");
+                    iconElement.classList.add("bi-bookmark");
+                    iconElement.style.color = "inherit";
                 } else {
-                    buttonElement.innerText = "🔖 Save";
-                    buttonElement.style.color = "";
+                    iconElement.classList.add("bi-bookmark-fill");
+                    iconElement.classList.remove("bi-bookmark");
+                    iconElement.style.color = "#0095f6";
                 }
             }
         } catch (err) {

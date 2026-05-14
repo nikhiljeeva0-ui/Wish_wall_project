@@ -1,5 +1,5 @@
 // newwish.js
-const API_URL = "https://wish-wall-project-1.onrender.com";
+const API_URL = window.API_URL || "http://localhost:3000";
 
 // 1. AUTH CHECK
 const token = localStorage.getItem("token");
@@ -78,7 +78,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`
                     },
-                    body: JSON.stringify({ content: text + "|||" + selColor + "|||" + selEmoji })
+                    body: JSON.stringify({ 
+                        content: text + "|||" + selColor + "|||" + selEmoji,
+                        isAnonymous: anonToggle ? anonToggle.checked : false
+                    })
                 });
 
                 if (response.ok) {

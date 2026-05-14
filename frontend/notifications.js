@@ -1,5 +1,5 @@
 // notifications.js
-const API_URL = "https://wish-wall-project-1.onrender.com";
+const API_URL = window.API_URL || "http://localhost:3000";
 
 // 1. AUTH CHECK
 const token = localStorage.getItem("token");

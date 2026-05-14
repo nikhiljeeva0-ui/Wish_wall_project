@@ -1,5 +1,5 @@
 // edit-profile.js
-const API_URL = "https://wish-wall-project-1.onrender.com";
+const API_URL = window.API_URL || "http://localhost:3000";
 
 // 1. AUTH CHECK
 const token = localStorage.getItem("token");
@@ -133,10 +133,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (response.ok) {
                     console.log("Server Updated Successfully:", data.user);
                     
-                    // CRITICAL: Update localStorage so other pages see the new name/avatar
+                    // 1. Update localStorage so other pages see the new name/avatar
                     localStorage.setItem("user", JSON.stringify(data.user)); 
                     
                     alert("Profile successfully updated!");
+                    
+                    // 2. Redirect to profile page to see changes
                     window.location.href = "profile.html"; 
                 } else {
                     alert(data.error || "Failed to update profile");

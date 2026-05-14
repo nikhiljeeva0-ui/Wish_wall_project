@@ -179,7 +179,7 @@ const authCheck = async (req, res) => {
 };
 
 module.exports = {
-  register: signup,
+  signup,
   login,
-  checkAuth: authCheck,
+  authCheck,
 };

@@ -23,11 +23,9 @@
                 </a>
                 <a href="#" class="nav-item" title="Bookmarks">
                     <i class="bi bi-bookmark"></i>
-                    <span class="badge">4</span>
                 </a>
                 <a href="notifications.html" class="nav-item" title="Notifications">
                     <i class="bi bi-bell"></i>
-                    <span class="badge alert">1</span>
                 </a>
                 <a href="profile.html" class="nav-item active" title="Profile">
                     <i class="bi bi-person"></i>
@@ -79,27 +77,17 @@
                     
                     <div class="form-row">
                         <label>Full Name</label>
-                        <input type="text" id="edit-name" class="input-light" value="Aisha Sharma">
+                        <input type="text" id="edit-name" class="input-light" value="">
                     </div>
 
                     <div class="form-row">
                         <label>Username</label>
-                        <input type="text" id="edit-username" class="input-light" value="@aisha_dreams">
+                        <input type="text" id="edit-username" class="input-light" value="" readonly>
                     </div>
 
                     <div class="form-row">
                         <label>Bio</label>
-                        <textarea id="edit-bio" class="input-light" rows="3">Chasing dreams, building startups, and loving life. Sharing my journey one wish at a time! ✨🚀</textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <label>Location</label>
-                        <input type="text" id="edit-location" class="input-light" value="Bangalore, India">
-                    </div>
-
-                    <div class="form-row">
-                        <label>Interests / Tags</label>
-                        <input type="text" id="edit-tags" class="input-light" value="Startups, Design, Travel">
+                        <textarea id="edit-bio" class="input-light" rows="3" placeholder="Tell us about yourself..."></textarea>
                     </div>
                 </div>
 
@@ -118,14 +106,15 @@
                     <div class="preview-cover"></div>
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aisha" id="preview-avatar" class="preview-avatar-img" alt="Preview">
                     <div class="preview-details">
-                        <h3 id="preview-name">Aisha Sharma</h3>
-                        <span id="preview-username">@aisha_dreams</span>
-                        <p id="preview-bio">Chasing dreams, building startups, and loving life. Sharing my journey one wish at a time! ✨🚀</p>
+                        <h3 id="preview-name">Loading...</h3>
+                        <span id="preview-username">@username</span>
+                        <p id="preview-bio">Bio will appear here...</p>
                     </div>
                 </div>
             </div>
         </aside>
     </div>
+    <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="edit-profile.js"></script>
 </body>

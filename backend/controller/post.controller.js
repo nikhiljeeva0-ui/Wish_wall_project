@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 const createPost = async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, isAnonymous } = req.body;
 
     if (!content || !content.trim()) {
       return res.status(400).json({
@@ -15,6 +15,7 @@ const createPost = async (req, res) => {
     const post = await Post.create({
       content: content.trim(),
       author: req.user.userId,
+      isAnonymous: !!isAnonymous
     });
 
     await post.populate("author", "name email");
